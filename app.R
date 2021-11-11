@@ -3,8 +3,11 @@ library(GEGVIC)
 library(clusterProfiler)
 library(dplyr)
 library(GSEAmining)
+library(ggplot2)
+library(ggrepel)
 
 source(file = 'R/s_gsea.R', local = TRUE)
+source(file = 'R/s_volcano.R', local = TRUE)
 
 options(shiny.maxRequestSize = 20*1024^2)
 
@@ -449,20 +452,20 @@ server <- function(input, output) {
                                plotOutput(outputId = paste0(n, '_gsea_clust')),
                                #Plot gsea wordclouds
                                plotOutput(outputId = paste0(n, '_gsea_word'))
-                               ),
-                    select = TRUE)
+                               )),
+                    select = TRUE
                   )
           
               # Outpot: Differential gene expression table
-              output[[paste0(n, '_table')]] <- renderPlot({
+              output[[paste0(n, '_table')]] <- renderDataTable({
                 annot.res[[x]]
               })
               
               # Output: Volcano Plot
               output[[paste0(n, '_volcano')]] <- renderPlot({
-                GEGVIC::ge_volcano(annot_res = annot.res[[x]],
-                                   fold_change = input$fold_change,
-                                   p.adj = input$p.adj)
+                s_volcano(annot_res = annot.res[[x]],
+                          fold_change = input$fold_change,
+                          p.adj = input$p.adj)
                 
               })
               
