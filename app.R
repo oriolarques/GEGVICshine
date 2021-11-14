@@ -17,6 +17,11 @@ source(file = 'R/s_gsea.R', local = TRUE)
 source(file = 'R/s_volcano.R', local = TRUE)
 source(file = 'R/s_mut_summary.R', local = TRUE)
 source(file = 'R/s_oncoplot.R', local = TRUE)
+source(file = 'R/s_mut_load.R', local = TRUE)
+source(file = 'R/s_mut_signatures.R', local = TRUE)
+source(file = 'R/s_plot_comp_samples.R', local = TRUE)
+source(file = 'R/s_plot_comp_celltypes.R', local = TRUE)
+source(file = 'R/s_score.R', local = TRUE)
 
 options(shiny.maxRequestSize = 20*1024^2)
 
@@ -237,9 +242,23 @@ ui <- fluidPage(
   #############################################################################        
         tabPanel(title = 'IC_module',
                  
+                 wellPanel(
+                   tags$h1('Immune composition by sample'),
+                   plotOutput('ic_samples')
+                 ),
                  
-                
+                 wellPanel(
+                   tags$h1('Immune composition by cell type'),
+                   plotOutput('ic_type')
+                 ),
+                 
+                 wellPanel(
+                   tags$h1('Immune score'),
+                   plotOutput('ic_phenogram'),
+                   plotOutput('ic_score')
                  )
+                
+              )
 
         
     )
@@ -580,6 +599,64 @@ server <- function(input, output) {
           
         }
         
+        # IC_module -----------------------------------------------------------  
+        
+        if(input$ic_module == TRUE){
+          
+          tpm <- GEGVIC::ic_raw_to_tpm(counts = counts(),
+                                       genes_id = input$genes_id,
+                                       biomart = biomart())
+          
+          ic.pred <- GEGVIC::ic_deconv(gene_expression = tpm,
+                                       indications = indications(),
+                                       #cibersort = cibersort,
+                                       tumor = TRUE,
+                                       rmgenes = NULL,
+                                       scale_mrna = TRUE,
+                                       expected_cell_types = NULL)
+          
+          
+          output$ic_samples <- renderPlot({
+            
+            s_plot_comp_samples(df = ic.pred,
+                                 metadata = metadata(),
+                                 response = input$response,
+                                 compare = input$compare,
+                                 p_label = input$p_label,
+                                 colors = colors())
+            
+          })
+          
+          output$ic_type <- renderPlot({
+            
+            s_plot_comp_celltypes(df = ic.pred,
+                                  metadata = metadata(),
+                                  response = input$response)
+            
+          })
+          
+          
+          ic.IPS_IPG <- s_score(tpm = tpm,
+                                metadata = metadata(),
+                                response = input$response,
+                                compare = input$compare,
+                                p_label = input$p_label,
+                                colors = colors())
+          
+          
+          output$ic_phenogram <- renderPlot({
+            ic.IPS_IPG$immunophenoGram
+            
+          })
+          
+          output$ic_score<- renderPlot({
+            ic.IPS_IPG$immunophenoScore
+            
+          })
+          
+          
+          
+        }
           
     }) # End button
 }
