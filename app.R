@@ -2,12 +2,21 @@ library(shiny)
 library(GEGVIC)
 library(clusterProfiler)
 library(dplyr)
+library(tidyr)
+library(tibble)
 library(GSEAmining)
 library(ggplot2)
 library(ggrepel)
+library(ggpubr)
+library(ggplotify)
+library(rlang)
+library(pheatmap)
+library(deconstructSigs)
 
 source(file = 'R/s_gsea.R', local = TRUE)
 source(file = 'R/s_volcano.R', local = TRUE)
+source(file = 'R/s_mut_summary.R', local = TRUE)
+source(file = 'R/s_oncoplot.R', local = TRUE)
 
 options(shiny.maxRequestSize = 20*1024^2)
 
@@ -108,7 +117,7 @@ ui <- fluidPage(
                  # indications
                  selectInput(inputId = 'indications', 
                              label = 'Cancer type method', 
-                             choices = list('Cancer type' = c("kich", "blca", "brca",
+                             choices = list('Cancer type' = sort(c("kich", "blca", "brca",
                                                               "cesc", "gbm", "hnsc",
                                                               "kirp", "lgg", "lihc",
                                                               "luad", "lusc", "prad",
@@ -118,7 +127,7 @@ ui <- fluidPage(
                                                               "acc", "meso", "thca",
                                                               "uvm", "ucs", "thym",
                                                               "esca", "stad", "read",
-                                                              "coad", "chol"))),
+                                                              "coad", "chol")))),
                  # compare
                  selectInput(inputId = 'compare',
                              label = 'Select means comparison method',
@@ -144,17 +153,30 @@ ui <- fluidPage(
                              choices = list('Comparison' = c('BSgenome.Hsapiens.UCSC.hg19',
                                                              'BSgenome.Hsapiens.UCSC.hg38'))),
                  # mut_sigs
-                 selectInput(inputId = 'gbuild',
+                 selectInput(inputId = 'mut_sigs',
                              label = 'Select mutational signatures matrix',
-                             choices = list('Comparison' = c('COSMIC_v2_SBS_GRCh37',
+                             choices = list('Mutational signature matrix' = 
+                                                           c('COSMIC_v2_SBS_GRCh37',
                                                              'COSMIC_v2_SBS_GRCh38',
                                                              'COSMIC_v3.2_SBS_GRCh37',
                                                              'COSMIC_v3.2_SBS_GRCh38',
                                                              'COSMIC_v3.2_DBS_GRCh37',
                                                              'COSMIC_v3.2_DBS_GRCh38'))),
-            
-            actionButton(inputId = "Execute", label = 'Execute')
-                 ),
+  
+          # Modules selection -------------------------------------------------
+          checkboxInput(inputId = 'ge_module', 
+                        label = 'Analyze Gene Expression', 
+                        value = FALSE),
+          checkboxInput(inputId = 'gv_module', 
+                        label = 'Analyze Genetic Variatons', 
+                        value = FALSE),
+          checkboxInput(inputId = 'ic_module', 
+                        label = 'Analyze Immune Composition', 
+                        value = FALSE),
+
+          # Execution button --------------------------------------------------
+          actionButton(inputId = "Execute", label = 'Execute')
+                ),
         
   #############################################################################        
         # GE_module -----------------------------------------------------         
@@ -169,24 +191,13 @@ ui <- fluidPage(
               plotOutput(outputId = 'pca')
             ),
             
-            # Differential expressed genes table
+            # Dynamic tab to show per comparison a tab with:
+            ## 1. Differential expressed genes table
+            ## 2. Volcano plot
+            ## 3. GSEA (cluster + wordclouds)
             tags$h1('Differentially Expressed genes'),
             
             tabsetPanel(id = 'de_tables')#,
-            
-            # Volcano plot
-            #wellPanel(
-              #Plot Volcano
-            #  plotOutput(outputId = 'volcano')
-            #),
-            
-            # GSEA
-            #wellPanel(
-              #Plot gsea cluster
-            #  plotOutput(outputId = 'gsea_clust'),
-              #Plot gsea wordclouds
-           #   plotOutput(outputId = 'gsea_word')
-            #)
             
         ),
 
@@ -194,17 +205,46 @@ ui <- fluidPage(
         # GV_module -----------------------------------------------------         
   #############################################################################        
         tabPanel(title = 'GV_module',
+                 
+                 wellPanel(
+                   tags$h1('Mutations summary'),
+                   plotOutput('mut_sum')
+                   
+                 ),
+                 
+                 wellPanel(
+                   tags$h1('Oncoplot'),
+                   plotOutput('oncoplot')
+                 ),
+                 
+                 wellPanel(
+                   tags$h1('Mutational Load'),
+                   plotOutput('mut_load')
+                 ),
+                 
+                 wellPanel(
+                   tags$h1('Mutational Signatures'),
+                   plotOutput('mut_sigs_bar'),
+                   plotOutput('mut_sigs_heat')
+                 )
+                 
+                 
+                 
                  ),
 
   #############################################################################        
         # IC_module -----------------------------------------------------         
   #############################################################################        
         tabPanel(title = 'IC_module',
+                 
+                 
                 
                  )
 
         
     )
+  
+
     
 
 )
@@ -248,7 +288,7 @@ server <- function(input, output) {
                           choices  = colnames(reactives$temp_meta))
     })
     
-   
+    
     #############################################################################        
     # Click button ---------------------------         
     #############################################################################       
@@ -383,7 +423,11 @@ server <- function(input, output) {
         
         
         # indications  --------------------------------------------------------
-        
+        indications <- reactive({
+          
+          rep(input$indications, nrow(metadata()))
+          
+        })
         
         
         
@@ -393,103 +437,151 @@ server <- function(input, output) {
         
         # GE_module -----------------------------------------------------------  
         
-        # Output: PCA
-        output$pca <- renderPlot({
-            GEGVIC::ge_pca(counts = counts(),
-                           genes_id = input$genes_id,
-                           metadata = metadata(),
-                           design = input$design,
-                           colors = colors())
-        })
-        
-        
-        # Differential gene expression calculation
-        results.dds <- GEGVIC::ge_diff_exp(counts = counts(),
-                                           genes_id = input$genes_id,
-                                           metadata = metadata(),
-                                           design = input$design,
-                                           ref_level = ref_level(),
-                                           shrink = input$shrink)
-        # Annotate gene results
-        annot.res <- GEGVIC::ge_annot(results_dds = results.dds,
-                                      genes_id = input$genes_id,
-                                      biomart = biomart())
-        
-        
-        # Output: Differential gene expression table
-        #for(i in seq_along(annot.res)){
-        #  n <- names(annot.res)[i]
-        #  appendTab(inputId = 'de_tables',
-        #            tabPanel(title = n,
-        #                     tags$h4(paste(n)),
-        #                     dataTableOutput(outputId = n)), 
-        #            select = TRUE)
-        #  output[[n]] <- renderDataTable({
-        #    annot.res[[i]]
-        #  })
-        #}
-        
-        lapply(seq_along(annot.res), function(x){
+        if(input$ge_module == TRUE) {
+          # Output: PCA
+          output$pca <- renderPlot({
+              GEGVIC::ge_pca(counts = counts(),
+                             genes_id = input$genes_id,
+                             metadata = metadata(),
+                             design = input$design,
+                             colors = colors())
+          })
           
-          n <- names(annot.res)[x]
           
-          appendTab(inputId = 'de_tables',
-                    
-                    tabPanel(title = n,
-                             tags$h4(paste(n)),
-                             # Differential gene expression table
-                             wellPanel(
-                               dataTableOutput(outputId = paste0(n, '_table'))
-                               ),
-                             # Volcano plot
-                             wellPanel(
-                               #Plot Volcano
-                               plotOutput(outputId = paste0(n, '_volcano'))
-                               ),
-                             # GSEA
-                             wellPanel(
-                               #Plot gsea cluster
-                               plotOutput(outputId = paste0(n, '_gsea_clust')),
-                               #Plot gsea wordclouds
-                               plotOutput(outputId = paste0(n, '_gsea_word'))
-                               )),
-                    select = TRUE
-                  )
+          # Differential gene expression calculation
+          results.dds <- GEGVIC::ge_diff_exp(counts = counts(),
+                                             genes_id = input$genes_id,
+                                             metadata = metadata(),
+                                             design = input$design,
+                                             ref_level = ref_level(),
+                                             shrink = input$shrink)
+          # Annotate gene results
+          annot.res <- GEGVIC::ge_annot(results_dds = results.dds,
+                                        genes_id = input$genes_id,
+                                        biomart = biomart())
           
-              # Outpot: Differential gene expression table
-              output[[paste0(n, '_table')]] <- renderDataTable({
-                annot.res[[x]]
-              })
-              
-              # Output: Volcano Plot
-              output[[paste0(n, '_volcano')]] <- renderPlot({
-                s_volcano(annot_res = annot.res[[x]],
-                          fold_change = input$fold_change,
-                          p.adj = input$p.adj)
+          
+          # Output: Dynamic tabs depending on the number of comparisons
+          ## Use lapply instead of a loop so shiny doesn't just show the values from last comparison
+          lapply(seq_along(annot.res), function(x){
+            # Store the names of the comparisons
+            n <- names(annot.res)[x]
+            ## Create a tab for each comparison with the appropriate name
+            appendTab(inputId = 'de_tables',
+                      # In each tab there will be three panels
+                      tabPanel(title = n,
+                               tags$h4(paste(n)),
+                               # 1. Differential gene expression table
+                               wellPanel(
+                                 dataTableOutput(outputId = paste0(n, '_table'))
+                                 ),
+                               # 2. Volcano plot
+                               wellPanel(
+                                 #Plot Volcano
+                                 plotOutput(outputId = paste0(n, '_volcano'))
+                                 ),
+                               # 3. GSEA
+                               wellPanel(
+                                 #Plot gsea cluster
+                                 plotOutput(outputId = paste0(n, '_gsea_clust')),
+                                 #Plot gsea wordclouds
+                                 plotOutput(outputId = paste0(n, '_gsea_word'))
+                                 )),
+                      select = TRUE
+                    )
+            
+                # Generate Output: Differential gene expression table
+                output[[paste0(n, '_table')]] <- renderDataTable({
+                  annot.res[[x]]
+                })
                 
-              })
-              
-              # Output: GSEA
-              gsea <- s_gsea(annot_res = annot.res[[x]],
-                             gmt = gmt(),
-                             gsea_pvalue = input$gsea_pvalue)
-              
-              output[[paste0(n, '_gsea_clust')]] <- renderPlot({
+                # Generate Output: Volcano Plot
+                output[[paste0(n, '_volcano')]] <- renderPlot({
+                  s_volcano(annot_res = annot.res[[x]],
+                            fold_change = input$fold_change,
+                            p.adj = input$p.adj)
+                  
+                })
                 
-                GSEAmining::gm_dendplot(df = gsea$gs.filt,
-                                        hc = gsea$gs.cl)
-              })
-              
-              output[[paste0(n, '_gsea_word')]] <- renderPlot({
+                # Generate Output: GSEA
+                gsea <- s_gsea(annot_res = annot.res[[x]],
+                               gmt = gmt(),
+                               gsea_pvalue = input$gsea_pvalue)
                 
-                GSEAmining::gm_enrichterms(df = gsea$gs.filt,
-                                           hc = gsea$gs.cl)
-              })
-        })
+                output[[paste0(n, '_gsea_clust')]] <- renderPlot({
+                  
+                  GSEAmining::gm_dendplot(df = gsea$gs.filt,
+                                          hc = gsea$gs.cl)
+                })
+                
+                output[[paste0(n, '_gsea_word')]] <- renderPlot({
+                  
+                  GSEAmining::gm_enrichterms(df = gsea$gs.filt,
+                                             hc = gsea$gs.cl)
+                })
+          })
+        }
+        
+        # GV_module -----------------------------------------------------------
+          
+        if(input$gv_module == TRUE){
+        
+          output$mut_sum <- renderPlot({
+            
+            s_mut_summary(muts = muts(),
+                          metadata = metadata(),
+                          top_genes = input$top_genes)
+            
+          })
+          
+          output$oncoplot <- renderPlot({
+            
+            s_oncoplot(muts = muts(),
+                       metadata = metadata(),
+                       response = input$response,
+                       top_genes = input$top_genes,
+                       colors = colors())
+            
+          })
+          
+          output$mut_load <- renderPlot({
+            s_mut_load(muts = muts(),
+                       metadata = metadata(), 
+                       response = input$response,
+                       compare = input$compare,
+                       p_label = input$p_label,
+                       colors = colors())
+            
+            
+            
+          })
           
           
-    })
-    
+          mut.sigs <- s_mut_signatures(muts = muts(),
+                                       metadata = metadata(), 
+                                       response = input$response,
+                                       gbuild = input$gbuild,
+                                       mut_sigs = input$mut_sigs,
+                                       colors = colors())
+          
+          output$mut_sigs_bar <- renderPlot({
+            
+            mut.sigs$mut_sig_barplot
+            
+            
+          })
+          
+          output$mut_sigs_heat <- renderPlot({
+            
+            mut.sigs$mut_sig_heatmap
+            
+            
+          })
+          
+        }
+        
+          
+    }) # End button
 }
 
 # Run the application 
