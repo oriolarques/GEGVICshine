@@ -12,6 +12,7 @@ library(ggplotify)
 library(rlang)
 library(pheatmap)
 library(deconstructSigs)
+library(shinyFiles)
 
 source(file = 'R/s_gsea.R', local = TRUE)
 source(file = 'R/s_volcano.R', local = TRUE)
@@ -64,10 +65,12 @@ ui <- fluidPage(
                            accept = c('.gmt')),
         
                 # cibersort
-                ## !!!!!!
-                ## !!!!!!
-                ## !!!!!!
-                ## !!!!!!
+                #fileInput(inputId = 'cibersort', 
+                #          label = 'CIBERSORT.R file'),
+                shinyDirButton(id = 'cibersort', label = 'file', title = 'here'),
+                textOutput(outputId = 'cibersort.path'),
+  
+  
                  ## Parameters ------------------------------------------------
                  # genes_id
                  selectInput(inputId = 'genes_id', 
@@ -170,13 +173,13 @@ ui <- fluidPage(
   
           # Modules selection -------------------------------------------------
           checkboxInput(inputId = 'ge_module', 
-                        label = 'Analyze Gene Expression', 
+                        label = 'Analyse Gene Expression', 
                         value = FALSE),
           checkboxInput(inputId = 'gv_module', 
-                        label = 'Analyze Genetic Variatons', 
+                        label = 'Analyse Genetic Variatons', 
                         value = FALSE),
           checkboxInput(inputId = 'ic_module', 
-                        label = 'Analyze Immune Composition', 
+                        label = 'Analyse Immune Composition', 
                         value = FALSE),
 
           # Execution button --------------------------------------------------
@@ -273,7 +276,7 @@ ui <- fluidPage(
 # SERVER -----------------------------------------------------          
 ############################################################################# 
 #############################################################################        
-server <- function(input, output) {
+server <- function(input, output, session) {
     
     #############################################################################        
     # Automatic detection of colnames in the metadata---------------------------         
@@ -305,6 +308,30 @@ server <- function(input, output) {
         updateSelectInput(inputId = 'response',
                           label = 'Select response variable', 
                           choices  = colnames(reactives$temp_meta))
+    })
+    
+    
+    # Read the CIBERSORT.R file -------------------------------------------
+    #cibersort <- reactive({
+    # Read the name in a new variable 
+    # file <- input$cibersort
+    # Get the datapath
+    #ext <- tools::file_ext(file$datapath)
+    #return(ext)
+    #})
+    
+    shinyFiles::shinyDirChoose(input, 
+                               id = 'cibersort', 
+                               roots = getVolumes()(), 
+                               session = session)
+    cibersort.path <- reactive({
+      paste0(as.character(parseDirPath(roots = getVolumes()()
+                                       ,selection = input$cibersort)),
+             '/')
+    })
+    
+    output$cibersort.path <- renderText({
+      cibersort.path()
     })
     
     
@@ -409,8 +436,11 @@ server <- function(input, output) {
           
         })
         
-        
-        
+        # cibersort -----------------------------------------------------------
+        #ciber.path <- reactive({
+        #  as.character(parseDirPath(roots = getVolumes()(),
+        #                            selection = input$cibersort))
+        #})
         
         # Colors: Convert colors input from text to vector --------------------
         colors <- reactive({
@@ -609,7 +639,7 @@ server <- function(input, output) {
           
           ic.pred <- GEGVIC::ic_deconv(gene_expression = tpm,
                                        indications = indications(),
-                                       #cibersort = cibersort,
+                                       cibersort = cibersort.path(),
                                        tumor = TRUE,
                                        rmgenes = NULL,
                                        scale_mrna = TRUE,
