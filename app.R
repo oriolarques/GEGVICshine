@@ -100,8 +100,10 @@ ui <- fluidPage(
                  # Input: biomart
                  selectInput(inputId = "biomart", 
                              label = 'BiomaRt database',
-                             choices = list('Genome_version' = c('ensembl_biomart_GRCh38_p13',
-                                                                 'ensembl_biomart_GRCh37'))),
+                             choices = list('Genome_version' = c('ensembl_biomart_GRCh37',
+                                                                 'ensembl_biomart_GRCh38_p13',
+                                                                 'ensembl_biomart_GRCm38_p6',
+                                                                 'ensembl_biomart_GRCm39'))),
                  # fold_change
                  numericInput(inputId = 'fold_change', 
                               label = 'Fold Change', 
@@ -169,7 +171,13 @@ ui <- fluidPage(
                                                              'COSMIC_v3.2_SBS_GRCh37',
                                                              'COSMIC_v3.2_SBS_GRCh38',
                                                              'COSMIC_v3.2_DBS_GRCh37',
-                                                             'COSMIC_v3.2_DBS_GRCh38'))),
+                                                             'COSMIC_v3.2_DBS_GRCh38',
+                                                             'COSMIC_v2_SBS_mm9',
+                                                             'COSMIC_v2_SBS_mm10',
+                                                             'COSMIC_v3.2_SBS_mm9',
+                                                             'COSMIC_v3.2_SBS_mm10',
+                                                             'COSMIC_v3.2_DBS_mm9',
+                                                             'COSMIC_v3.2_DBS_mm10'))),
   
           # Modules selection -------------------------------------------------
           checkboxInput(inputId = 'ge_module', 
