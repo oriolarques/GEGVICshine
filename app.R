@@ -1,3 +1,4 @@
+# Required packages
 library(shiny)
 library(GEGVIC)
 library(clusterProfiler)
@@ -13,7 +14,9 @@ library(rlang)
 library(pheatmap)
 library(deconstructSigs)
 library(shinyFiles)
+library(shinythemes)
 
+# Functions inside the App
 source(file = 'R/s_gsea.R', local = TRUE)
 source(file = 'R/s_volcano.R', local = TRUE)
 source(file = 'R/s_mut_summary.R', local = TRUE)
@@ -24,6 +27,7 @@ source(file = 'R/s_plot_comp_samples.R', local = TRUE)
 source(file = 'R/s_plot_comp_celltypes.R', local = TRUE)
 source(file = 'R/s_score.R', local = TRUE)
 
+# Increment input file size available for gmt files.
 options(shiny.maxRequestSize = 20*1024^2)
 
 
@@ -33,100 +37,147 @@ options(shiny.maxRequestSize = 20*1024^2)
 #############################################################################  
 #############################################################################        
 
-ui <- fluidPage(
+ui <- navbarPage(
+    title = 'GEGVICshine',
     
-    tabsetPanel(
-        
-        tabPanel(title = 'Parameters',
+    theme = shinytheme('cosmo'),
+    
+    tabPanel(title = 'Parameters',
   #############################################################################        
         # User parameters -----------------------------------------------------          
-  #############################################################################        
-                 ## Inputs ----------------------------------------------------
-                 # Input: RNA-seq raw counts
-                 fileInput(inputId = "counts", 
-                           label = 'RNA-seq raw counts',
-                           accept = c('.csv')),
-                 # Input: Metadata
-                 fileInput(inputId = "metadata", 
-                           label = 'Metadata',
-                           accept = c('.csv')),
-                    # response
-                    ## It will be dynamic UI component
-                    selectInput(inputId = 'response',
-                                label = 'Select response variable',
-                                choices = ""),
-                 # Input: Genetic variations
-                 fileInput(inputId = "muts", 
-                           label = 'Genetic Variations',
-                           accept = c('.csv')),
-                 # Input: gmt
-                 fileInput(inputId = "gmt", 
-                           label = 'Gene sets (as .gmt file)',
-                           accept = c('.gmt')),
+  #############################################################################    
+      tabsetPanel(
+        
+        id = 'parameters_panel',
+        
+        ## Modules selection ----------------------------------------------
+        tabPanel(
+          title = '1. Modules selection',
+          
+          wellPanel(
+            tags$h3('Select all the modules you want to run'),
+            tags$hr(),
+            checkboxInput(inputId = 'ge_module', 
+                          label = 'Analyse Gene Expression (GE_module)', 
+                          value = FALSE),
+            checkboxInput(inputId = 'gv_module', 
+                          label = 'Analyse Genetic Variatons (GV_module)', 
+                          value = FALSE),
+            checkboxInput(inputId = 'ic_module', 
+                          label = 'Analyse Immune Composition (IC_module)', 
+                          value = FALSE)
+            ),
+          actionButton(inputId = 'to_input', 
+                       label = 'Next section',
+                       class = 'btn-primary')
+        ),
+        
+        ## Inputs ----------------------------------------------------
+        # Input: RNA-seq raw counts
+        tabPanel(
+          title = '2. Inputs',
+          wellPanel(
+            tags$h3('Upload necessary inputs'),
+            tags$hr(),
+            fileInput(inputId = "counts", 
+                      label = 'RNA-seq raw counts (GE, IC)',
+                      accept = c('.csv')),
+            # Input: Metadata
+            fileInput(inputId = "metadata", 
+                      label = 'Metadata (GE, GV, IC)',
+                      accept = c('.csv')),
+              # response
+              ## It will be dynamic UI component
+              selectInput(inputId = 'response',
+                          label = 'Select response variable (GV, IC)',
+                          choices = ""),
+            # Input: Genetic variations
+            fileInput(inputId = "muts", 
+                      label = 'Genetic Variations (GV)',
+                      accept = c('.csv')),
+            # Input: gmt
+            fileInput(inputId = "gmt", 
+                      label = 'Gene sets (as .gmt file) (GE)',
+                      accept = c('.gmt')),
         
                 # cibersort
-                #fileInput(inputId = 'cibersort', 
-                #          label = 'CIBERSORT.R file'),
-                shinyDirButton(id = 'cibersort', label = 'file', title = 'here'),
+                tags$p(tags$strong('Select folder in your computer containing:')),
+                tags$p(tags$strong('CIBERSORT.R and LM22.txt files (IC)')),
+                ## Create a button
+                shinyDirButton(id = 'cibersort', 
+                               label = 'Browse folders', 
+                               title = 'Select folder'),
+                ## Generate output to show the user that the path has been obtained
                 textOutput(outputId = 'cibersort.path'),
+                tags$p()
+            ),
+          actionButton(inputId = 'to_parameters', 
+                       label = 'Next section',
+                       class = 'btn-primary')
+        ),
   
   
-                 ## Parameters ------------------------------------------------
+            ## Parameters -----------------------------------------------------
+          tabPanel(
+            title = '3. Parameters',
+            wellPanel(
+              tags$h3('Define necessary parameters'),
+              tags$hr(),
                  # genes_id
                  selectInput(inputId = 'genes_id', 
-                             label = 'Genes ID', 
+                             label = 'Genes ID (GE, IC)', 
                              choices = list('Genes ID' = c("hgnc_symbol",
                                                            "entrezgene_id", 
                                                            "ensembl_gene_id"))),
                  # design
                  textInput(inputId = 'design',
-                           label = 'Design formula', 
+                           label = 'Design formula (GE)', 
                            placeholder = 'Cell + Treatment + Cell:Treatment'),                
                  # colors
                  textInput(inputId = 'colors',
                            label = 'Colors: Indicate the color for each sample group
-                           separated by commas',
+                           separated by commas (GE, GV, IC)',
                            placeholder = 'black, orange'), 
                  # ref_level
                  textInput(inputId = 'ref_level',
-                           label = 'Reference level: Name of the grouping variable',
+                           label = 'Reference level: Name of the grouping variable (GE)',
                            placeholder = 'Non_Responders'), 
                  # shrink
                  selectInput(inputId = 'shrink', 
-                             label = 'Shrinkage method', 
+                             label = 'Shrinkage method (GE)', 
                              choices = list('Shrinkage' = c("apeglm", "ashr", 
                                                             "normal", "none")),
                              selected = 'apeglm'),
                  # Input: biomart
                  selectInput(inputId = "biomart", 
-                             label = 'BiomaRt database',
+                             label = 'BiomaRt database (GE, IC)',
                              choices = list('Genome_version' = c('ensembl_biomart_GRCh37',
                                                                  'ensembl_biomart_GRCh38_p13',
                                                                  'ensembl_biomart_GRCm38_p6',
                                                                  'ensembl_biomart_GRCm39'))),
                  # fold_change
                  numericInput(inputId = 'fold_change', 
-                              label = 'Fold Change', 
+                              label = 'Fold Change (GE)', 
                               value = 2, 
                               min = 0, 
                               step = 0.5),
                  # p.adj
                  numericInput(inputId = 'p.adj', 
-                              label = 'Adjusted p-value for gene expression data', 
+                              label = 'Adjusted p-value for gene expression data (GE)', 
                               value = 0.05, 
                               min = 0, 
                               max = 1,
-                              step = 0.1),
+                              step = 0.05),
                  # gsea_pvalue
                  numericInput(inputId = 'gsea_pvalue', 
-                              label = 'Adjusted p-value for GSEA', 
+                              label = 'Adjusted p-value for GSEA (GE)', 
                               value = 0.2, 
                               min = 0, 
                               max = 1,
-                              step = 0.1),
+                              step = 0.05),
                  # indications
                  selectInput(inputId = 'indications', 
-                             label = 'Cancer type method', 
+                             label = 'Cancer types: TCGA Study Abbreviations. (IC)', 
                              choices = list('Cancer type' = sort(c("kich", "blca", "brca",
                                                               "cesc", "gbm", "hnsc",
                                                               "kirp", "lgg", "lihc",
@@ -140,31 +191,33 @@ ui <- fluidPage(
                                                               "coad", "chol")))),
                  # compare
                  selectInput(inputId = 'compare',
-                             label = 'Select means comparison method',
+                             label = 'Select means comparison method (GV, IC)',
                              choices = list('Comparison' = c('t.test',
                                                              'wilcox.test',
                                                              'anova',
                                                              'kruskal.test'))),
                  # p_label
-                 selectInput(inputId = 'compare',
-                             label = 'Select means comparison method',
+                 selectInput(inputId = 'p_label',
+                             label = 'Select means comparison method (GV, IC)',
                              choices = list('Comparison' = c('p.format',
                                                              'p.signif'))),
                  # top_genes
                  numericInput(inputId = 'top_genes', 
-                              label = 'Number of genes for oncoplot', 
+                              label = 'Number of genes for oncoplot (GV)', 
                               value = 10, 
                               min = 1, 
                               max = 50,
                               step = 1),
                  # gbuild
                  selectInput(inputId = 'gbuild',
-                             label = 'Select genomic build',
+                             label = 'Select genomic build (GV)',
                              choices = list('Comparison' = c('BSgenome.Hsapiens.UCSC.hg19',
-                                                             'BSgenome.Hsapiens.UCSC.hg38'))),
+                                                             'BSgenome.Hsapiens.UCSC.hg38',
+                                                             'BSgenome.Mmusculus.UCSC.mm10',
+                                                             'BSgenome.Mmusculus.UCSC.mm39'))),
                  # mut_sigs
                  selectInput(inputId = 'mut_sigs',
-                             label = 'Select mutational signatures matrix',
+                             label = 'Select mutational signatures matrix (GV)',
                              choices = list('Mutational signature matrix' = 
                                                            c('COSMIC_v2_SBS_GRCh37',
                                                              'COSMIC_v2_SBS_GRCh38',
@@ -177,22 +230,30 @@ ui <- fluidPage(
                                                              'COSMIC_v3.2_SBS_mm9',
                                                              'COSMIC_v3.2_SBS_mm10',
                                                              'COSMIC_v3.2_DBS_mm9',
-                                                             'COSMIC_v3.2_DBS_mm10'))),
-  
-          # Modules selection -------------------------------------------------
-          checkboxInput(inputId = 'ge_module', 
-                        label = 'Analyse Gene Expression', 
-                        value = FALSE),
-          checkboxInput(inputId = 'gv_module', 
-                        label = 'Analyse Genetic Variatons', 
-                        value = FALSE),
-          checkboxInput(inputId = 'ic_module', 
-                        label = 'Analyse Immune Composition', 
-                        value = FALSE),
-
-          # Execution button --------------------------------------------------
-          actionButton(inputId = "Execute", label = 'Execute')
-                ),
+                                                             'COSMIC_v3.2_DBS_mm10')))
+                 ),
+            actionButton(inputId = 'to_execute', 
+                         label = 'Next section',
+                         class = 'btn-primary')
+            
+            ),
+          
+          
+              ## Execution button -----------------------------------------------
+          tabPanel(
+            title = '4. Run GEGVIC',
+            wellPanel(
+              tags$h4('Run GEGVIC if you have filled all inputs and parameters'),
+              tags$strong('Check the results visiting each module section using 
+                          top level navigation bar.'),
+              tags$hr(),
+              actionButton(inputId = "Execute", 
+                           label = 'Execute')
+            )
+          ) 
+                  
+      )
+    ), # End Parameters
         
   #############################################################################        
         # GE_module -----------------------------------------------------         
@@ -200,9 +261,7 @@ ui <- fluidPage(
         tabPanel(title = 'GE_module',
             # PCA
             wellPanel(
-              
               tags$h1('PCA'),
-              
               #Plot PCA
               plotOutput(outputId = 'pca')
             ),
@@ -213,9 +272,9 @@ ui <- fluidPage(
             ## 3. GSEA (cluster + wordclouds)
             tags$h1('Differentially Expressed genes'),
             
-            tabsetPanel(id = 'de_tables')#,
+            tabsetPanel(id = 'de_tables')
             
-        ),
+        ), # End GE_module
 
   #############################################################################        
         # GV_module -----------------------------------------------------         
@@ -246,7 +305,7 @@ ui <- fluidPage(
                  
                  
                  
-                 ),
+                 ), # End GV_module
 
   #############################################################################        
         # IC_module -----------------------------------------------------         
@@ -269,13 +328,7 @@ ui <- fluidPage(
                    plotOutput('ic_score')
                  )
                 
-              )
-
-        
-    )
-  
-
-    
+              ) # End IC_module
 
 )
 
@@ -285,7 +338,34 @@ ui <- fluidPage(
 ############################################################################# 
 #############################################################################        
 server <- function(input, output, session) {
+  
+  
+  #############################################################################        
+  # Buttons to switch sections in parameters tab ---------------------------         
+  #############################################################################       
+  
+  observeEvent(input$to_input, {
+    updateTabsetPanel(session, 
+                      inputId = "parameters_panel",
+                      selected = '2. Inputs')
+  })
+  
+  observeEvent(input$to_parameters, {
+    updateTabsetPanel(session, 
+                      inputId = "parameters_panel",
+                      selected = '3. Parameters')
+  })
+  
+  observeEvent(input$to_execute, {
+    updateTabsetPanel(session, 
+                      inputId = "parameters_panel",
+                      selected = '4. Run GEGVIC')
+  })
     
+  
+  
+  
+  
     #############################################################################        
     # Automatic detection of colnames in the metadata---------------------------         
     #############################################################################       
