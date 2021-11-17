@@ -50,7 +50,8 @@ s_gsea <- function(annot_res,
         
         gs.cl <- GSEAmining::gm_clust(df = gs.filt)
         
-        gsea <- list(gs.filt = gs.filt,
+        gsea <- list(gsea_result = temp_gsea@result,
+                     gs.filt = gs.filt,
                      gs.cl = gs.cl)
         
     

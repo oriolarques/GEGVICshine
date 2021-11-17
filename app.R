@@ -13,6 +13,7 @@ library(ggplotify)
 library(rlang)
 library(pheatmap)
 library(deconstructSigs)
+library(DT)
 library(shinyFiles)
 library(shinythemes)
 
@@ -89,7 +90,7 @@ ui <- navbarPage(
               # response
               ## It will be dynamic UI component
               selectInput(inputId = 'response',
-                          label = 'Select response variable (GV, IC)',
+                          label = 'Select response variable (GE, GV, IC)',
                           choices = ""),
             # Input: Genetic variations
             fileInput(inputId = "muts", 
@@ -139,9 +140,14 @@ ui <- navbarPage(
                            separated by commas (GE, GV, IC)',
                            placeholder = 'black, orange'), 
                  # ref_level
-                 textInput(inputId = 'ref_level',
-                           label = 'Reference level: Name of the grouping variable (GE)',
-                           placeholder = 'Non_Responders'), 
+                 #textInput(inputId = 'ref_level',
+                #           label = 'Reference level: Name of the grouping variable (GE)',
+                 #          placeholder = 'Non_Responders'), 
+                 selectInput(inputId = 'ref_level',
+                             label = 'Reference level: Name of the grouping variable (GE)',
+                             choices = ""),
+              
+              
                  # shrink
                  selectInput(inputId = 'shrink', 
                              label = 'Shrinkage method (GE)', 
@@ -263,7 +269,8 @@ ui <- navbarPage(
             wellPanel(
               tags$h1('PCA'),
               #Plot PCA
-              plotOutput(outputId = 'pca')
+              plotOutput(outputId = 'pca', 
+                         width = '80%')
             ),
             
             # Dynamic tab to show per comparison a tab with:
@@ -283,24 +290,34 @@ ui <- navbarPage(
                  
                  wellPanel(
                    tags$h1('Mutations summary'),
-                   plotOutput('mut_sum')
+                   plotOutput(outputId = 'mut_sum', 
+                              width = '75%',
+                              height = '600px')
                    
                  ),
                  
                  wellPanel(
                    tags$h1('Oncoplot'),
-                   plotOutput('oncoplot')
+                   plotOutput(outputId = 'oncoplot',
+                              width = '75%',
+                              height = '600px')
                  ),
                  
                  wellPanel(
                    tags$h1('Mutational Load'),
-                   plotOutput('mut_load')
+                   plotOutput(outputId = 'mut_load', 
+                              width = '75%',
+                              height = '600px')
                  ),
                  
                  wellPanel(
                    tags$h1('Mutational Signatures'),
-                   plotOutput('mut_sigs_bar'),
-                   plotOutput('mut_sigs_heat')
+                   plotOutput(outputId = 'mut_sigs_bar', 
+                              width = '80%',
+                              height = '700px'),
+                   plotOutput(outputId = 'mut_sigs_heat', 
+                              width = '80%',
+                              height = '700px')
                  )
                  
                  
@@ -314,18 +331,23 @@ ui <- navbarPage(
                  
                  wellPanel(
                    tags$h1('Immune composition by sample'),
-                   plotOutput('ic_samples')
+                   plotOutput(outputId = 'ic_samples',
+                              height = '1000px')
                  ),
                  
                  wellPanel(
                    tags$h1('Immune composition by cell type'),
-                   plotOutput('ic_type')
+                   plotOutput(outputId = 'ic_type',
+                              height = '800px')
                  ),
                  
                  wellPanel(
                    tags$h1('Immune score'),
-                   plotOutput('ic_phenogram'),
-                   plotOutput('ic_score')
+                   plotOutput(outputId = 'ic_phenogram',
+                              height = '800px'),
+                   plotOutput(outputId = 'ic_score', 
+                              width = '75%',
+                              height = '600px')
                  )
                 
               ) # End IC_module
@@ -375,7 +397,7 @@ server <- function(input, output, session) {
         temp_meta = NULL
     )
     
-    # React to metadata upload
+    # response: React to metadata upload ---------------------------------------
     observeEvent(input$metadata, {
         # Make it empty if no metadata is loaded
         if (is.null(input$metadata))
@@ -394,20 +416,39 @@ server <- function(input, output, session) {
         }
         # Update the selection input for response
         updateSelectInput(inputId = 'response',
-                          label = 'Select response variable', 
+                          label = 'Select response variable (GE, GV, IC)', 
                           choices  = colnames(reactives$temp_meta))
+        
     })
     
+    # ref_level --------------------------------------
+    observeEvent(input$to_parameters, {
+      # Make it empty if no metadata is loaded
+      if (is.null(input$metadata))
+        return()
+      # Ensure the file is uploaded and available
+      req(input$metadata)
+      # Read the name in a new variable 
+      file <- input$metadata
+      # Read metdata in the reactive object already created
+      reactives$temp_meta <- read.csv(file = file$datapath, 
+                                      header = TRUE, sep = ',')
+      # In case the sep value is ';'
+      if (ncol(reactives$temp_meta) == 1) {
+        reactives$temp_meta <- read.csv(file = file$datapath, 
+                                        header = TRUE, sep = ';')
+      }
+      sel.column <- rlang::sym(input$response)
+      sel.column <- reactives$temp_meta %>% 
+        dplyr::select(sel.column)
+      
+      # Update the selection input for response
+      updateSelectInput(inputId = 'ref_level',
+                        label = 'Reference level: Name of the grouping variable (GE)', 
+                        choices  = unique(sel.column))
+    })
     
     # Read the CIBERSORT.R file -------------------------------------------
-    #cibersort <- reactive({
-    # Read the name in a new variable 
-    # file <- input$cibersort
-    # Get the datapath
-    #ext <- tools::file_ext(file$datapath)
-    #return(ext)
-    #})
-    
     shinyFiles::shinyDirChoose(input, 
                                id = 'cibersort', 
                                roots = getVolumes()(), 
@@ -524,11 +565,6 @@ server <- function(input, output, session) {
           
         })
         
-        # cibersort -----------------------------------------------------------
-        #ciber.path <- reactive({
-        #  as.character(parseDirPath(roots = getVolumes()(),
-        #                            selection = input$cibersort))
-        #})
         
         # Colors: Convert colors input from text to vector --------------------
         colors <- reactive({
@@ -540,13 +576,7 @@ server <- function(input, output, session) {
             c(input$response, input$ref_level)
         })
         
-        
-        # reference level  ----------------------------------------------------
-        ref_level <- reactive({
-          c(input$response, input$ref_level)
-        })
-        
-        
+
         # biomart
         biomart <- reactive({
           if(input$biomart == 'ensembl_biomart_GRCh38_p13'){
@@ -554,8 +584,7 @@ server <- function(input, output, session) {
           } else {
             GEGVIC::ensembl_biomart_GRCh37
           }
-          
-          
+        
         })
         
         
@@ -565,6 +594,11 @@ server <- function(input, output, session) {
           rep(input$indications, nrow(metadata()))
           
         })
+        
+        # cibersort  --------------------------------------------------------
+        #if(cibersort.path() == '/'){
+        #  cibersort.path <-  NULL
+        #}
         
         
         
@@ -610,27 +644,52 @@ server <- function(input, output, session) {
                                tags$h4(paste(n)),
                                # 1. Differential gene expression table
                                wellPanel(
-                                 dataTableOutput(outputId = paste0(n, '_table'))
+                                 dataTableOutput(outputId = paste0(n, '_table')),
+                                 downloadButton(outputId = paste0('down_',n, '_table'), 
+                                                label = 'Download table'),
                                  ),
                                # 2. Volcano plot
                                wellPanel(
                                  #Plot Volcano
-                                 plotOutput(outputId = paste0(n, '_volcano'))
+                                 plotOutput(outputId = paste0(n, '_volcano'), 
+                                            width = '75%',
+                                            height = '600px')
                                  ),
                                # 3. GSEA
                                wellPanel(
+                                 # Add table
+                                 dataTableOutput(outputId = paste0(n, '_gsea_table')),
+                                 downloadButton(outputId = paste0('down_',n, '_gsea_table'), 
+                                                label = 'Download table'),
                                  #Plot gsea cluster
-                                 plotOutput(outputId = paste0(n, '_gsea_clust')),
+                                 plotOutput(outputId = paste0(n, '_gsea_clust'), 
+                                            width = '75%',
+                                            height = '800px'),
                                  #Plot gsea wordclouds
-                                 plotOutput(outputId = paste0(n, '_gsea_word'))
+                                 plotOutput(outputId = paste0(n, '_gsea_word'), 
+                                            width = '75%',
+                                            height = '800px')
                                  )),
                       select = TRUE
                     )
             
                 # Generate Output: Differential gene expression table
-                output[[paste0(n, '_table')]] <- renderDataTable({
-                  annot.res[[x]]
-                })
+                output[[paste0(n, '_table')]] <- DT::renderDataTable(
+                  annot.res[[x]] %>% 
+                    dplyr::mutate_if(is.numeric, function(x) round(x, 4)),
+                  options = list(scrollX = TRUE,
+                                 pageLength = 10)
+                )
+                
+                output[[paste0('down_', n, '_table')]] <- downloadHandler(
+                  filename = function(){
+                    paste0(n, '_diff_exprs_table.csv')
+                    },
+                  content = function(f){
+                    write.csv(x = annot.res[[x]],
+                              file = f)
+                  }
+                )
                 
                 # Generate Output: Volcano Plot
                 output[[paste0(n, '_volcano')]] <- renderPlot({
@@ -644,6 +703,33 @@ server <- function(input, output, session) {
                 gsea <- s_gsea(annot_res = annot.res[[x]],
                                gmt = gmt(),
                                gsea_pvalue = input$gsea_pvalue)
+                
+                output[[paste0(n, '_gsea_table')]] <- DT::renderDataTable(
+                  gsea$gsea_result %>% 
+                    dplyr::mutate_if(is.numeric, function(x) round(x, 4)) %>% 
+                    tibble::rownames_to_column('name') %>% 
+                    dplyr::select(-name), 
+                  options = list(scrollX = TRUE,
+                                 pageLength = 10,
+                                 columnDefs = list(list(targets = c(10,11),
+                                                      render = JS(
+                                                        "function(data, type, row, meta) {",
+                                                        "return type === 'display' && data.length > 6 ?",
+                                                        "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
+                                                        "}")))))
+                
+                output[[paste0('down_', n, '_gsea_table')]] <- downloadHandler(
+                  filename = function(){
+                    paste0(n, '_gsea_table.csv')
+                  },
+                  content = function(f){
+                    write.csv(x = gsea$gsea_result %>% 
+                                dplyr::mutate_if(is.numeric, function(x) round(x, 4)) %>% 
+                                tibble::rownames_to_column('name') %>% 
+                                dplyr::select(-name),
+                              file = f)
+                  }
+                )
                 
                 output[[paste0(n, '_gsea_clust')]] <- renderPlot({
                   
@@ -725,9 +811,18 @@ server <- function(input, output, session) {
                                        genes_id = input$genes_id,
                                        biomart = biomart())
           
+          if(cibersort.path() == '/'){
+            
+            cibersort.final.path <-  NULL
+            
+          } else {
+            cibersort.final.path <- cibersort.path()
+          }
+          
+          
           ic.pred <- GEGVIC::ic_deconv(gene_expression = tpm,
                                        indications = indications(),
-                                       cibersort = cibersort.path(),
+                                       cibersort = cibersort.final.path,
                                        tumor = TRUE,
                                        rmgenes = NULL,
                                        scale_mrna = TRUE,

@@ -1,0 +1,14 @@
+name: GEGVICshine
+title: GEGVICshine
+username:
+account: oriolarques
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5137990
+bundleId: 5259285
+url: https://oriolarques.shinyapps.io/GEGVICshine/
+when: 1637090869.89765
+lastSyncTime: 1637090869.89767
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|CIBERSORT-Results.txt
