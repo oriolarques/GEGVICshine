@@ -66,7 +66,7 @@ s_volcano <- function(annot_res,
                                             by = 1)) +
             
             # Define the title, theme and axes
-            ggtitle(names(annot_res)[i])+
+            ggtitle(names(annot_res))+
             xlab('Log2 Fold Change')+
             ylab('-log10(Adjusted p-value)')+
             theme_bw()+

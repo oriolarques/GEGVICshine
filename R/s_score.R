@@ -270,7 +270,7 @@ s_score <- function(tpm,
     ## Add metadata information
     DF <- DF %>%
         dplyr::left_join(x = .,
-                         y = metadata_ge_module,
+                         y = metadata,
                          by = 'Samples') %>%
         dplyr::group_by(!!response)
     

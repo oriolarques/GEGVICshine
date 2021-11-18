@@ -71,7 +71,7 @@ s_mut_signatures <- function(muts,
                                             ids_samples = ids_samples) %>%
         # Join predicted mutational signature results with metadata
         dplyr::left_join(x = .,
-                         y = metadata_ge_module,
+                         y = metadata,
                          by = c('Samples')) %>%
         # Round predicted mutational signature contribution
         dplyr::mutate(Value = round(x = Value, digits = 2))

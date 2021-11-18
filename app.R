@@ -16,6 +16,7 @@ library(deconstructSigs)
 library(DT)
 library(shinyFiles)
 library(shinythemes)
+library(tm)
 
 # Functions inside the App
 source(file = 'R/s_gsea.R', local = TRUE)
@@ -134,18 +135,16 @@ ui <- navbarPage(
                  textInput(inputId = 'design',
                            label = 'Design formula (GE)', 
                            placeholder = 'Cell + Treatment + Cell:Treatment'),                
+                 # ref_level
+                 selectInput(inputId = 'ref_level',
+                             label = 'Reference level: Name of the grouping variable (GE)',
+                             choices = ""), 
                  # colors
                  textInput(inputId = 'colors',
                            label = 'Colors: Indicate the color for each sample group
                            separated by commas (GE, GV, IC)',
                            placeholder = 'black, orange'), 
-                 # ref_level
-                 #textInput(inputId = 'ref_level',
-                #           label = 'Reference level: Name of the grouping variable (GE)',
-                 #          placeholder = 'Non_Responders'), 
-                 selectInput(inputId = 'ref_level',
-                             label = 'Reference level: Name of the grouping variable (GE)',
-                             choices = ""),
+                
               
               
                  # shrink
