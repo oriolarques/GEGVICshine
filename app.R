@@ -276,7 +276,7 @@ ui <- navbarPage(
             ## 1. Differential expressed genes table
             ## 2. Volcano plot
             ## 3. GSEA (cluster + wordclouds)
-            tags$h1('Differentially Expressed genes'),
+            tags$h1('Differentially Expressed Genes'),
             
             tabsetPanel(id = 'de_tables')
             
@@ -640,15 +640,16 @@ server <- function(input, output, session) {
             appendTab(inputId = 'de_tables',
                       # In each tab there will be three panels
                       tabPanel(title = n,
-                               tags$h4(paste(n)),
                                # 1. Differential gene expression table
                                wellPanel(
+                                 tags$h4('Table of Differentially Expressed Genes'),
                                  dataTableOutput(outputId = paste0(n, '_table')),
                                  downloadButton(outputId = paste0('down_',n, '_table'), 
                                                 label = 'Download table'),
                                  ),
                                # 2. Volcano plot
                                wellPanel(
+                                 tags$h4('Volcano Plot'),
                                  #Plot Volcano
                                  plotOutput(outputId = paste0(n, '_volcano'), 
                                             width = '75%',
@@ -656,15 +657,21 @@ server <- function(input, output, session) {
                                  ),
                                # 3. GSEA
                                wellPanel(
+                                 tags$h4('GSEA'),
+                                 # Add text in case no gene set is found
+                                 htmlOutput(outputId = paste0(n, '_no_gsea')),
                                  # Add table
+                                 tags$h4('Table of Enriched Gene Sets'),
                                  dataTableOutput(outputId = paste0(n, '_gsea_table')),
                                  downloadButton(outputId = paste0('down_',n, '_gsea_table'), 
                                                 label = 'Download table'),
                                  #Plot gsea cluster
+                                 tags$h4('Gene Set Clusters'),
                                  plotOutput(outputId = paste0(n, '_gsea_clust'), 
                                             width = '75%',
                                             height = '800px'),
                                  #Plot gsea wordclouds
+                                 tags$h4('Gene Set Enriched Terms'),
                                  plotOutput(outputId = paste0(n, '_gsea_word'), 
                                             width = '75%',
                                             height = '800px')
@@ -703,44 +710,55 @@ server <- function(input, output, session) {
                                gmt = gmt(),
                                gsea_pvalue = input$gsea_pvalue)
                 
-                output[[paste0(n, '_gsea_table')]] <- DT::renderDataTable(
-                  gsea$gsea_result %>% 
-                    dplyr::mutate_if(is.numeric, function(x) round(x, 4)) %>% 
-                    tibble::rownames_to_column('name') %>% 
-                    dplyr::select(-name), 
-                  options = list(scrollX = TRUE,
-                                 pageLength = 10,
-                                 columnDefs = list(list(targets = c(10,11),
-                                                      render = JS(
-                                                        "function(data, type, row, meta) {",
-                                                        "return type === 'display' && data.length > 6 ?",
-                                                        "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
-                                                        "}")))))
-                
-                output[[paste0('down_', n, '_gsea_table')]] <- downloadHandler(
-                  filename = function(){
-                    paste0(n, '_gsea_table.csv')
-                  },
-                  content = function(f){
-                    write.csv(x = gsea$gsea_result %>% 
-                                dplyr::mutate_if(is.numeric, function(x) round(x, 4)) %>% 
-                                tibble::rownames_to_column('name') %>% 
-                                dplyr::select(-name),
-                              file = f)
-                  }
-                )
-                
-                output[[paste0(n, '_gsea_clust')]] <- renderPlot({
+                if (names(gsea) == 'no_genesets') {
+                  output[[paste0(n, '_no_gsea')]] <- renderText({
+                    
+                    '<b> No gene sets are enriched under specific pvalueCutoff!! </b>'
+                    
+                  })
                   
-                  GSEAmining::gm_dendplot(df = gsea$gs.filt,
-                                          hc = gsea$gs.cl)
-                })
-                
-                output[[paste0(n, '_gsea_word')]] <- renderPlot({
+                 
+                } else {
+                  output[[paste0(n, '_gsea_table')]] <- DT::renderDataTable(
+                    
+                    gsea$gsea_result %>% 
+                      dplyr::mutate_if(is.numeric, function(x) round(x, 4)) %>% 
+                      tibble::rownames_to_column('name') %>% 
+                      dplyr::select(-name), 
+                    options = list(scrollX = TRUE,
+                                   pageLength = 10,
+                                   columnDefs = list(list(targets = c(10,11),
+                                                          render = JS(
+                                                            "function(data, type, row, meta) {",
+                                                            "return type === 'display' && data.length > 6 ?",
+                                                            "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
+                                                            "}")))))
                   
-                  GSEAmining::gm_enrichterms(df = gsea$gs.filt,
-                                             hc = gsea$gs.cl)
-                })
+                  output[[paste0('down_', n, '_gsea_table')]] <- downloadHandler(
+                    filename = function(){
+                      paste0(n, '_gsea_table.csv')
+                    },
+                    content = function(f){
+                      write.csv(x = gsea$gsea_result %>% 
+                                  dplyr::mutate_if(is.numeric, function(x) round(x, 4)) %>% 
+                                  tibble::rownames_to_column('name') %>% 
+                                  dplyr::select(-name),
+                                file = f)
+                    }
+                  )
+                  
+                  output[[paste0(n, '_gsea_clust')]] <- renderPlot({
+                    GSEAmining::gm_dendplot(df = gsea$gs.filt,
+                                            hc = gsea$gs.cl)
+                  })
+                  
+                  output[[paste0(n, '_gsea_word')]] <- renderPlot({
+                         
+                    GSEAmining::gm_enrichterms(df = gsea$gs.filt,
+                                               hc = gsea$gs.cl)
+                  })
+                }
+                
           })
         }
         

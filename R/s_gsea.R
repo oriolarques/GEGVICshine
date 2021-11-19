@@ -24,7 +24,7 @@ s_gsea <- function(annot_res,
         names(temp_gs) <- as.character(temp_df$hgnc_symbol)
 
     
-    # 3. Perform GSEA
+    # 2. Perform GSEA
     ## Create an empty list to store GSEA results
     temp_gsea <- NULL
     
@@ -33,7 +33,11 @@ s_gsea <- function(annot_res,
         temp_gsea <- GSEA(geneList = temp_gs,
                           TERM2GENE = gmt,
                           pvalueCutoff = gsea_pvalue)
-    
+            
+    # Check if GSEA result is empty and print a message
+    if (nrow(temp_gsea@result) == 0) {
+        gsea <- list(no_genesets = temp_gsea@result)
+    } else {
     # 3. GSEAmining
         # Filter gene sets to analyse the top ones
         gs.filt <- temp_gsea@result %>%
@@ -53,7 +57,7 @@ s_gsea <- function(annot_res,
         gsea <- list(gsea_result = temp_gsea@result,
                      gs.filt = gs.filt,
                      gs.cl = gs.cl)
-        
+    }
     
     return(gsea)
     
