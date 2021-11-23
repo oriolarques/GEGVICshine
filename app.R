@@ -44,6 +44,18 @@ ui <- navbarPage(
     
     theme = shinytheme('cosmo'),
     
+    selected = 'Parameters',
+    
+    #############################################################################        
+    # Manual -----------------------------------------------------         
+    #############################################################################        
+    tabPanel(title = 'Getting started',
+             
+             #includeMarkdown(path = 'www/gegvic_shine_manual.Rmd')
+             includeHTML(path = 'www/gegvic_shine_manual.html')
+             
+    ), # End Manual section
+    
     tabPanel(title = 'Parameters',
   #############################################################################        
         # User parameters -----------------------------------------------------          
@@ -119,7 +131,7 @@ ui <- navbarPage(
         ),
   
   
-            ## Parameters -----------------------------------------------------
+          ## Parameters -----------------------------------------------------
           tabPanel(
             title = '3. Parameters',
             wellPanel(
@@ -182,7 +194,7 @@ ui <- navbarPage(
                               step = 0.05),
                  # indications
                  selectInput(inputId = 'indications', 
-                             label = 'Cancer types: TCGA Study Abbreviations. (IC)', 
+                             label = 'Cancer types: TCGA Study Abbreviations (IC)', 
                              choices = list('Cancer type' = sort(c("kich", "blca", "brca",
                                                               "cesc", "gbm", "hnsc",
                                                               "kirp", "lgg", "lihc",
@@ -244,7 +256,7 @@ ui <- navbarPage(
             ),
           
           
-              ## Execution button -----------------------------------------------
+          ## Execution button -----------------------------------------------
           tabPanel(
             title = '4. Run GEGVIC',
             wellPanel(
@@ -288,7 +300,7 @@ ui <- navbarPage(
         tabPanel(title = 'GV_module',
                  
                  wellPanel(
-                   tags$h1('Mutations summary'),
+                   tags$h1('Mutations Summary'),
                    plotOutput(outputId = 'mut_sum', 
                               width = '75%',
                               height = '600px')
@@ -328,20 +340,28 @@ ui <- navbarPage(
   #############################################################################        
         tabPanel(title = 'IC_module',
                  
+                 # Table with the prediction results
                  wellPanel(
-                   tags$h1('Immune composition by sample'),
+                   tags$h1('Summary of Predicted Immune Cell Populations'),
+                   dataTableOutput(outputId = 'ic_pred_table'),
+                   downloadButton(outputId = 'down_ic_pred_table', 
+                                  label = 'Download table'),
+                 ),
+                 
+                 wellPanel(
+                   tags$h1('Immune Composition: Cell Types Comparison by Groups'),
                    plotOutput(outputId = 'ic_samples',
                               height = '1000px')
                  ),
                  
                  wellPanel(
-                   tags$h1('Immune composition by cell type'),
+                   tags$h1('Immune Composition: Cell Types Comparison within Samples '),
                    plotOutput(outputId = 'ic_type',
                               height = '800px')
                  ),
                  
                  wellPanel(
-                   tags$h1('Immune score'),
+                   tags$h1('Immune Score'),
                    plotOutput(outputId = 'ic_phenogram',
                               height = '800px'),
                    plotOutput(outputId = 'ic_score', 
@@ -594,20 +614,26 @@ server <- function(input, output, session) {
           
         })
         
-        # cibersort  --------------------------------------------------------
-        #if(cibersort.path() == '/'){
-        #  cibersort.path <-  NULL
-        #}
+        # Create a Progress object ---------------------------------------------
+        progress <- shiny::Progress$new()
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
         
-        
-        
+      
         #######################################################################        
         # Generate outputs ---------------------------         
         #######################################################################  
         
+        withProgress(message = NULL,
+                     detail = NULL,
+                     min = 0,
+                     max = 10, 
+                     expr = {
+        
         # GE_module -----------------------------------------------------------  
         
         if(input$ge_module == TRUE) {
+          
           # Output: PCA
           output$pca <- renderPlot({
               GEGVIC::ge_pca(counts = counts(),
@@ -619,17 +645,21 @@ server <- function(input, output, session) {
           
           
           # Differential gene expression calculation
+          setProgress(value = 1, message = 'Calculating differential gene expression')
+          
           results.dds <- GEGVIC::ge_diff_exp(counts = counts(),
                                              genes_id = input$genes_id,
                                              metadata = metadata(),
                                              design = input$design,
                                              ref_level = ref_level(),
                                              shrink = input$shrink)
+          
+          setProgress(value = 2, message = 'Annotating gene symbols')
+          
           # Annotate gene results
           annot.res <- GEGVIC::ge_annot(results_dds = results.dds,
                                         genes_id = input$genes_id,
                                         biomart = biomart())
-          
           
           # Output: Dynamic tabs depending on the number of comparisons
           ## Use lapply instead of a loop so shiny doesn't just show the values from last comparison
@@ -706,6 +736,8 @@ server <- function(input, output, session) {
                 })
                 
                 # Generate Output: GSEA
+                setProgress(value = 3, message = 'Calculating GSEA')
+                
                 gsea <- s_gsea(annot_res = annot.res[[x]],
                                gmt = gmt(),
                                gsea_pvalue = input$gsea_pvalue)
@@ -719,6 +751,8 @@ server <- function(input, output, session) {
                   
                  
                 } else {
+                  setProgress(value = 7, message = 'Plotting GSEA')
+                  
                   output[[paste0(n, '_gsea_table')]] <- DT::renderDataTable(
                     
                     gsea$gsea_result %>% 
@@ -766,6 +800,9 @@ server <- function(input, output, session) {
           
         if(input$gv_module == TRUE){
         
+          # Output: Mutational summary
+          setProgress(value = 4, message = 'Summarizing mutations')
+          
           output$mut_sum <- renderPlot({
             
             s_mut_summary(muts = muts(),
@@ -774,8 +811,11 @@ server <- function(input, output, session) {
             
           })
           
+          # Output: Oncoplot
+          setProgress(value = 5, message = 'Generating Oncoplot')
+          
           output$oncoplot <- renderPlot({
-            
+          
             s_oncoplot(muts = muts(),
                        metadata = metadata(),
                        response = input$response,
@@ -784,7 +824,11 @@ server <- function(input, output, session) {
             
           })
           
+          # Output: Mutational load
+          setProgress(value = 6, message = 'Calculating mutational load')
+          
           output$mut_load <- renderPlot({
+            
             s_mut_load(muts = muts(),
                        metadata = metadata(), 
                        response = input$response,
@@ -796,7 +840,10 @@ server <- function(input, output, session) {
             
           })
           
+          # Mutational signatures
+          setProgress(value = 7, message = 'Predicting mutational signatures')
           
+          ## Predict 
           mut.sigs <- s_mut_signatures(muts = muts(),
                                        metadata = metadata(), 
                                        response = input$response,
@@ -815,7 +862,6 @@ server <- function(input, output, session) {
             
             mut.sigs$mut_sig_heatmap
             
-            
           })
           
         }
@@ -824,18 +870,25 @@ server <- function(input, output, session) {
         
         if(input$ic_module == TRUE){
           
+          # TPM calculation
+          setProgress(value = 8, message = 'Calculating TPM')
+          
           tpm <- GEGVIC::ic_raw_to_tpm(counts = counts(),
                                        genes_id = input$genes_id,
                                        biomart = biomart())
           
-          if(cibersort.path() == '/'){
-            
+          # Check whether the user defined the CIBERSORT folder
+          if(cibersort.path() == '/'){ 
+            # If not set the path to NULL
             cibersort.final.path <-  NULL
             
           } else {
             cibersort.final.path <- cibersort.path()
           }
           
+          
+          # Immune prediction
+          setProgress(value = 9, message = 'Predicting immune cell populations')
           
           ic.pred <- GEGVIC::ic_deconv(gene_expression = tpm,
                                        indications = indications(),
@@ -845,7 +898,26 @@ server <- function(input, output, session) {
                                        scale_mrna = TRUE,
                                        expected_cell_types = NULL)
           
+          # Generate Output: Table of predicted immune cell populations
+          output[['ic_pred_table']] <- DT::renderDataTable(
+            ic.pred %>% 
+              dplyr::mutate_if(is.numeric, function(x) round(x, 3)),
+            options = list(scrollX = TRUE,
+                           pageLength = 10)
+          )
           
+          output[['down_ic_pred_table']] <- downloadHandler(
+            filename = function(){
+              'table_immune_prediction.csv'
+            },
+            content = function(f){
+              write.csv(x = ic.pred,
+                        file = f)
+            }
+          )
+          
+          
+          ## Output: Plot immune prediction comparison of cell types by groups
           output$ic_samples <- renderPlot({
             
             s_plot_comp_samples(df = ic.pred,
@@ -857,6 +929,7 @@ server <- function(input, output, session) {
             
           })
           
+          ## Output: Plot immune prediction comparison by sample
           output$ic_type <- renderPlot({
             
             s_plot_comp_celltypes(df = ic.pred,
@@ -865,6 +938,8 @@ server <- function(input, output, session) {
             
           })
           
+          
+          setProgress(value = 10, message = 'Calculating immune score')
           
           ic.IPS_IPG <- s_score(tpm = tpm,
                                 metadata = metadata(),
@@ -884,11 +959,13 @@ server <- function(input, output, session) {
             
           })
           
-          
-          
         }
-          
+        
+      }) # End progress bar
+      
     }) # End button
+    
+    
 }
 
 # Run the application 
