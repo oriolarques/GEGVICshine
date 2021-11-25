@@ -51,8 +51,9 @@ ui <- navbarPage(
     #############################################################################        
     tabPanel(title = 'Getting started',
              
-             #includeMarkdown(path = 'www/gegvic_shine_manual.Rmd')
-             includeHTML(path = 'www/gegvic_shine_manual.html')
+             fluidPage(
+               htmlOutput(outputId = 'manual')
+               )
              
     ), # End Manual section
     
@@ -380,6 +381,17 @@ ui <- navbarPage(
 #############################################################################        
 server <- function(input, output, session) {
   
+  #############################################################################        
+  # Include the GEGVICshine manual page in HTML ---------------------------         
+  #############################################################################       
+  
+  output$manual <- renderUI({
+    tags$iframe(seamless="seamless",
+                src = 'gegvic_shine_manual.html', 
+                width = '100%',  
+                height = 1000,  style = "border:none;")
+  })
+  
   
   #############################################################################        
   # Buttons to switch sections in parameters tab ---------------------------         
@@ -481,8 +493,7 @@ server <- function(input, output, session) {
     output$cibersort.path <- renderText({
       cibersort.path()
     })
-    
-    
+
     #############################################################################        
     # Click button ---------------------------         
     #############################################################################       
