@@ -41,14 +41,16 @@ This tab is where you can find the present manual page.
 
 Parameters is the default tab that appears when opening the app and is the section where the user can upload the input files and define the rest of the parameters needed to perform all the analyses. In total there are four sub-tabs in this section and the user must fill in the indicated parameters in each case and click the button to access the next sub-tab. 
 
-In all of the cases, for each parameter has a tag (between brackets) that indicates in which modules it is necessary. The codes are: **GE** for the GE_module (Gene Expression), **GV** for the GV_module (Genetic Variations) or **IC** for the IC_module (Immune cell Composition).
+In all of the cases, each parameter has a tag (between brackets) that indicates in which analytical modules it is necessary. The codes are: **GE** for the GE_module (Gene Expression), **GV** for the GV_module (Genetic Variations) or **IC** for the IC_module (Immune cell Composition).
 
 The parameters sub-tabs are:
 
 ##### 1. Modules selection
+
 Click to select which of the modules (either one, two or all three) will be included in the analysis.
 
 ##### 2. Inputs
+
 Here the user need to upload the necessary input files: 
 
 ![](02_GEGVICshine_inputs_subtab.png)
@@ -71,13 +73,14 @@ Here the user need to upload the necessary input files:
 
 - **Gene set collections to be analysed by GSEA in a form of a .gmt file**: Those files can be downloaded from the Molecular Signatures Database, [MSigDB](http://www.gsea-msigdb.org/gsea/downloads.jsp) or be customly created following the corresponding [guidelines] (https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats). In the case of working with mouse data gmt files can be found [here](https://bioinf.wehi.edu.au/MSigDB/). 
 
-All files must be .csv files (comma separated values) except for the gene sets that must be in the form of a .gmt file. Example files can be obtained from the GEGVIC package or using the following [link](https://github.com/oriolarques/GEGVIC/tree/main/inst/extdata).
-
 - **Select folder in your computer containing: CIBERSORT.R and LM22.txt files (IC)**: As the title indicates, the user need to navigate through the system folders to indicate the folder where CIBERSORT.R and LM22.txt files are stored. 
 *To use the CIBERSORT algorithm, the user need to register on the CIBERSORT web page (https://cibersort.st anford.edu), obtain a license and download the source code in form of two files CIBERSORT.R and LM22.txt. Finally, both files should be stored in the same folder.*
 
+All files must be .csv files (comma separated values) except for the gene sets that must be in the form of a .gmt file. Example files can be obtained from the GEGVIC package or using the following [link](https://github.com/oriolarques/GEGVIC/tree/main/inst/extdata).
+
 
 ##### 3. Parameters: 
+
 This section contains several parameters in three different flavours, either as a drop-down list, an empty space to be filled in with text or with numeric values. List and numeric parameters contain one of the options selected by default, whereas in the case of the text parameters the box contains a character string giving the user a hint as to what can be entered.
 
 ![](03_GEGVICshine_parameters_subtab.png)
@@ -113,7 +116,7 @@ This section contains several parameters in three different flavours, either as 
 
 ##### 4. Run GEGVIC
 
-Once all the desired modules have been selected, the input files have been uploaded and the parameters have been set, it is time to click the `execute` button to start the analyses. Once the process start, a progress bar will appear in the lower right corner of the screen showing the processes that are being executed in the server.
+Once all the desired modules have been selected, the input files have been uploaded and the parameters have been set, it is time to click the `execute` button to start the analyses. When the process starts, a progress bar will appear in the lower right corner of the screen showing the processes that are being executed in the server.
 
 ![](04_GEGVICshine_execute_subtab.png)
 ![](05_progress_bar.png)
