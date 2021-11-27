@@ -30,7 +30,7 @@ s_gsea <- function(annot_res,
     
     ## Execute GSEA
     ### Iterate over the annotated results list
-        temp_gsea <- GSEA(geneList = temp_gs,
+        temp_gsea <- clusterProfiler::GSEA(geneList = temp_gs,
                           TERM2GENE = gmt,
                           pvalueCutoff = gsea_pvalue)
             
