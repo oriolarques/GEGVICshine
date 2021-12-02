@@ -647,11 +647,12 @@ server <- function(input, output, session) {
           
           # Output: PCA
           output$pca <- renderPlot({
-              GEGVIC::ge_pca(counts = counts(),
-                             genes_id = input$genes_id,
-                             metadata = metadata(),
-                             design = input$design,
-                             colors = colors())
+              s_pca(counts = counts(),
+                    genes_id = input$genes_id,
+                    metadata = metadata(),
+                    response = input$response,
+                    design = input$design,
+                    colors = colors())
           })
           
           
