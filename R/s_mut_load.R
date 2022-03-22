@@ -59,5 +59,7 @@ s_mut_load <- function(muts,
     }
     
     # Return the plot
-    print(p)
+    res.mut.load <- list(mut.load.table = mut.load,
+                         mut.load.plot = p)
+    return(res.mut.load)
 }

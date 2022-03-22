@@ -105,6 +105,16 @@ s_score <- function(tpm,
             WEIGHT[k] <- mean(W1[which (as.vector(IPSG$NAME)==gen)])
             k <- k+1
         }
+        
+        ## Chunk added to avoid problems with data coming from mouse
+        ## such as genes missing in the process of finding orthologs
+        # In case there is an element as NA due to missing genes in data
+        for(x in seq_along(MIG)){
+            if(is.na(MIG[x])){
+                MIG[x]<-0
+            }
+        }        
+        
         WG<-MIG*WEIGHT
         MHC[i] <- mean(WG[1:10])
         CP[i] <- mean(WG[11:20])
@@ -331,8 +341,14 @@ s_score <- function(tpm,
     
     ## Get IPS comparison between samples in different levels of response variable
     ic.score.results[[2]] <- ips.plot
-    names(ic.score.results) <- c('immunophenoGram', 'immunophenoScore')
     
+    ## Add the results data frame
+    ic.score.results[[3]] <- DF
+    
+    ## Define the names of the elements in the list
+    names(ic.score.results) <- c('immunophenoGram', 
+                                 'immunophenoScore',
+                                 'ips_table')
     
     return(ic.score.results)
 }

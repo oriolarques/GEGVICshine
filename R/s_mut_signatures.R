@@ -169,7 +169,8 @@ s_mut_signatures <- function(muts,
                          silent = TRUE)
     
     # Merge the resulting plots -----------------------------------------------
-    mut.plot.list <- list(mut_sig_barplot = bar.plot,
+    mut.plot.list <- list(mut_sig_table = results.extr,
+                          mut_sig_barplot = bar.plot,
                           mut_sig_heatmap = ggplotify::as.ggplot(heat.map))
     
     return(mut.plot.list)

@@ -119,15 +119,6 @@ ui <- navbarPage(
                       accept = c('.gmt')),
         
             # cibersort
-                #tags$p(tags$strong('Select folder in your computer containing:')),
-                #tags$p(tags$strong('CIBERSORT.R and LM22.txt files (IC)')),
-                ## Create a button
-                #shinyDirButton(id = 'cibersort', 
-                #               label = 'Browse folders', 
-                #               title = 'Select folder'),
-                ## Generate output to show the user that the path has been obtained
-                #textOutput(outputId = 'cibersort.path'),
-                #tags$p()
             fileInput(inputId = "cibersort_R", 
                       label = 'CIBERSORT: .R file (IC)',
                       accept = c('.R')),
@@ -337,7 +328,7 @@ ui <- navbarPage(
               tags$h4('Table of Gene Sets Enrichment'),
               dataTableOutput(outputId = 'gsva_table'),
               downloadButton(outputId = 'down_gsva_table', 
-                             label = 'Download table'),
+                             label = 'Download table')
               
             )
             
@@ -367,7 +358,12 @@ ui <- navbarPage(
                    tags$h1('Mutational Load'),
                    plotOutput(outputId = 'mut_load', 
                               width = '75%',
-                              height = '600px')
+                              height = '600px'),
+                   ## Table with the results
+                   tags$h4('Mutational Load Table'),
+                   dataTableOutput(outputId = 'mut_load_table'),
+                   downloadButton(outputId = 'down_mut_load_table', 
+                                  label = 'Download table')
                  ),
                  
                  wellPanel(
@@ -377,7 +373,12 @@ ui <- navbarPage(
                               height = '700px'),
                    plotOutput(outputId = 'mut_sigs_heat', 
                               width = '80%',
-                              height = '700px')
+                              height = '700px'),
+                   ## Table with the results
+                   tags$h4('Results Table'),
+                   dataTableOutput(outputId = 'mut_sig_table'),
+                   downloadButton(outputId = 'down_mut_sig_table', 
+                                  label = 'Download table')
                  )
               
                ), # End GV_module
@@ -394,26 +395,31 @@ ui <- navbarPage(
                    downloadButton(outputId = 'down_ic_pred_table', 
                                   label = 'Download table')
                  ),
-                 
+                 # Plot Immune Composition: Cell Types Comparison by Groups
                  wellPanel(
                    tags$h1('Immune Composition: Cell Types Comparison by Groups'),
                    plotOutput(outputId = 'ic_samples',
                               height = '1000px')
                  ),
-                 
+                 # Plot Immune Composition: Cell Types Comparison within Samples
                  wellPanel(
-                   tags$h1('Immune Composition: Cell Types Comparison within Samples '),
+                   tags$h1('Immune Composition: Cell Types Comparison within Samples'),
                    plotOutput(outputId = 'ic_type',
                               height = '800px')
                  ),
-                 
+                 # Plot IPG and IPS
                  wellPanel(
                    tags$h1('Immune Score'),
                    plotOutput(outputId = 'ic_phenogram',
                               height = '800px'),
                    plotOutput(outputId = 'ic_score', 
                               width = '75%',
-                              height = '600px')
+                              height = '600px'),
+                   ## Table with the results
+                   tags$h4('Results Table'),
+                   dataTableOutput(outputId = 'ips_table'),
+                   downloadButton(outputId = 'down_ips_table', 
+                                  label = 'Download table')
                  )
                 
               ) # End IC_module
@@ -461,9 +467,6 @@ server <- function(input, output, session) {
                       selected = '4. Run GEGVIC')
   })
     
-  
-  
-  
   
     #############################################################################        
     # Automatic detection of colnames in the metadata---------------------------         
@@ -525,20 +528,6 @@ server <- function(input, output, session) {
                         choices  = unique(sel.column))
     })
     
-    # Read the CIBERSORT.R file -------------------------------------------
-    #shinyFiles::shinyDirChoose(input, 
-    #                           id = 'cibersort', 
-    #                           roots = getVolumes()(), 
-    #                           session = session)
-    #cibersort.path <- reactive({
-    #  paste0(as.character(parseDirPath(roots = getVolumes()()
-    #                                   ,selection = input$cibersort)),
-    #         '/')
-    #})
-    
-    #output$cibersort.path <- renderText({
-    #  cibersort.path()
-    #})
 
     #############################################################################        
     # Click button ---------------------------         
@@ -992,46 +981,82 @@ server <- function(input, output, session) {
             
           })
           
-          # Output: Mutational load
+          # Mutational load
           setProgress(value = 6, message = 'Calculating mutational load')
           
+          ## Output: Mutational Load plot
+          mut.load <- s_mut_load(muts = muts(),
+                                 metadata = metadata(), 
+                                 response = input$response,
+                                 compare = input$compare,
+                                 p_label = input$p_label,
+                                 colors = colors())
+                      
           output$mut_load <- renderPlot({
             
-            s_mut_load(muts = muts(),
-                       metadata = metadata(), 
-                       response = input$response,
-                       compare = input$compare,
-                       p_label = input$p_label,
-                       colors = colors())
-            
-            
+            mut.load$mut.load.plot
             
           })
+          
+          ## Output: Mutational Load Table
+          output[['mut_load_table']] <- DT::renderDataTable(
+            as.data.frame(mut.load$mut.load.table) %>% 
+              dplyr::mutate_if(is.numeric, function(x) round(x, 3)),
+            options = list(scrollX = TRUE,
+                           pageLength = 10)
+          )
+          
+          output[['down_mut_load_table']] <- downloadHandler(
+            filename = function(){
+              'table_mut_load.csv'
+            },
+            content = function(f){
+              write.csv(x =  mut.load$mut.load.table,
+                        file = f)
+            }
+          )
+
           
           # Mutational signatures
           setProgress(value = 7, message = 'Predicting mutational signatures')
           
-          ## Predict 
+          ## Predictions
           mut.sigs <- s_mut_signatures(muts = muts(),
                                        metadata = metadata(), 
                                        response = input$response,
                                        gbuild = input$gbuild,
                                        mut_sigs = input$mut_sigs,
                                        colors = colors())
-          
+          ## Output: Bar plot
           output$mut_sigs_bar <- renderPlot({
             
             mut.sigs$mut_sig_barplot
             
             
           })
-          
+          ## Output: Heatmap
           output$mut_sigs_heat <- renderPlot({
             
             mut.sigs$mut_sig_heatmap
             
           })
+          ## Output: Predictions Table
+          output[['mut_sig_table']] <- DT::renderDataTable(
+            as.data.frame(mut.sigs$mut_sig_table) %>% 
+              dplyr::mutate_if(is.numeric, function(x) round(x, 3)),
+            options = list(scrollX = TRUE,
+                           pageLength = 10)
+          )
           
+          output[['down_mut_sig_table']] <- downloadHandler(
+            filename = function(){
+              'table_mut_sig.csv'
+            },
+            content = function(f){
+              write.csv(x =  mut.sigs$mut_sig_table,
+                        file = f)
+            }
+          )
         }
         
         # IC_module -----------------------------------------------------------  
@@ -1045,16 +1070,7 @@ server <- function(input, output, session) {
                                        genes_id = input$genes_id,
                                        biomart = biomart())
           
-          # Check whether the user defined the CIBERSORT folder
-          #if(cibersort.path() == '/'){ 
-            # If not set the path to NULL
-          #  cibersort.final.path <-  NULL
-            
-          #} else {
-          #  cibersort.final.path <- cibersort.path()
-          #}
-          
-          
+
           # Immune prediction
           setProgress(value = 9, message = 'Predicting immune cell populations')
           
@@ -1110,6 +1126,7 @@ server <- function(input, output, session) {
           
           setProgress(value = 10, message = 'Calculating immune score')
           
+          # Calculate IPS and IPG
           ic.IPS_IPG <- s_score(tpm = tpm,
                                 metadata = metadata(),
                                 response = input$response,
@@ -1117,16 +1134,33 @@ server <- function(input, output, session) {
                                 p_label = input$p_label,
                                 colors = colors())
           
-          
+          ## Output: Plot IPG
           output$ic_phenogram <- renderPlot({
             ic.IPS_IPG$immunophenoGram
-            
           })
           
+          ## Output: Plot IPS
           output$ic_score<- renderPlot({
             ic.IPS_IPG$immunophenoScore
-            
           })
+          
+          ## Output: Predictions Table
+          output[['ips_table']] <- DT::renderDataTable(
+            as.data.frame(ic.IPS_IPG$ips_table) %>% 
+              dplyr::mutate_if(is.numeric, function(x) round(x, 3)),
+            options = list(scrollX = TRUE,
+                           pageLength = 10)
+          )
+          
+          output[['down_ips_table']] <- downloadHandler(
+            filename = function(){
+              'table_ips.csv'
+            },
+            content = function(f){
+              write.csv(x =  ic.IPS_IPG$ips_table,
+                        file = f)
+            }
+          )
           
         }
         
