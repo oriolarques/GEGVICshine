@@ -2,6 +2,18 @@ s_gsea <- function(annot_res,
                    gmt,
                    gsea_pvalue = 0.2) {
 
+    # 0. If samples come from mouse (by the presence of one extra column)
+    if('human_ortholog' %in% colnames(annot_res) == TRUE){
+        # By each data frame in annot_res
+        annot_res <- annot_res %>%
+            # Substitute mouse gene symbol with the human homolog symbol
+            dplyr::mutate(hgnc_symbol = human_ortholog) %>%
+            # Filter those missing gene symbols
+            dplyr::filter(hgnc_symbol != '') %>%
+            # Remove duplicated genes
+            dplyr::distinct(hgnc_symbol, .keep_all = TRUE)
+    }
+        
     # 1. Obtain geneLists
     ## Create a list to store as many geneList as conditions
     geneLists <- list()
@@ -30,9 +42,9 @@ s_gsea <- function(annot_res,
     
     ## Execute GSEA
     ### Iterate over the annotated results list
-        temp_gsea <- clusterProfiler::GSEA(geneList = temp_gs,
-                          TERM2GENE = gmt,
-                          pvalueCutoff = gsea_pvalue)
+    temp_gsea <- clusterProfiler::GSEA(geneList = temp_gs,
+                      TERM2GENE = gmt,
+                      pvalueCutoff = gsea_pvalue)
             
     # Check if GSEA result is empty and print a message
     if (nrow(temp_gsea@result) == 0) {
@@ -49,8 +61,8 @@ s_gsea <- function(annot_res,
             dplyr::filter(.data$p.adjust < gsea_pvalue) %>%
             dplyr::top_n(., n = 20, wt = abs(.data$NES)) %>%
             dplyr::ungroup(.) %>%
-            dplyr::select(.data$ID, .data$NES,
-                          .data$p.adjust, .data$core_enrichment)
+            dplyr::select(.data$ID, .data$NES, .data$p.adjust, 
+                          .data$leading_edge, .data$core_enrichment)
         
         gs.cl <- GSEAmining::gm_clust(df = gs.filt)
         

@@ -19,6 +19,7 @@ library(shinythemes)
 library(tm)
 
 # Functions inside the App
+source(file = 'R/s_deconv.R', local = TRUE)
 source(file = 'R/s_gsea.R', local = TRUE)
 source(file = 'R/s_volcano.R', local = TRUE)
 source(file = 'R/s_mut_summary.R', local = TRUE)
@@ -28,6 +29,8 @@ source(file = 'R/s_mut_signatures.R', local = TRUE)
 source(file = 'R/s_plot_comp_samples.R', local = TRUE)
 source(file = 'R/s_plot_comp_celltypes.R', local = TRUE)
 source(file = 'R/s_score.R', local = TRUE)
+source(file = 'R/s_single.R', local = TRUE)
+
 
 # Increment input file size available for gmt files.
 options(shiny.maxRequestSize = 20*1024^2)
@@ -115,16 +118,22 @@ ui <- navbarPage(
                       label = 'Gene sets (as .gmt file) (GE)',
                       accept = c('.gmt')),
         
-                # cibersort
-                tags$p(tags$strong('Select folder in your computer containing:')),
-                tags$p(tags$strong('CIBERSORT.R and LM22.txt files (IC)')),
+            # cibersort
+                #tags$p(tags$strong('Select folder in your computer containing:')),
+                #tags$p(tags$strong('CIBERSORT.R and LM22.txt files (IC)')),
                 ## Create a button
-                shinyDirButton(id = 'cibersort', 
-                               label = 'Browse folders', 
-                               title = 'Select folder'),
+                #shinyDirButton(id = 'cibersort', 
+                #               label = 'Browse folders', 
+                #               title = 'Select folder'),
                 ## Generate output to show the user that the path has been obtained
-                textOutput(outputId = 'cibersort.path'),
-                tags$p()
+                #textOutput(outputId = 'cibersort.path'),
+                #tags$p()
+            fileInput(inputId = "cibersort_R", 
+                      label = 'CIBERSORT: .R file (IC)',
+                      accept = c('.R')),
+            fileInput(inputId = "cibersort_LM22", 
+                      label = 'CIBERSORT: LM22.txt file (IC)',
+                      accept = c('.txt'))
             ),
           actionButton(inputId = 'to_parameters', 
                        label = 'Next section',
@@ -132,7 +141,7 @@ ui <- navbarPage(
         ),
   
   
-          ## Parameters -----------------------------------------------------
+        ## Parameters -----------------------------------------------------
           tabPanel(
             title = '3. Parameters',
             wellPanel(
@@ -141,13 +150,15 @@ ui <- navbarPage(
                  # genes_id
                  selectInput(inputId = 'genes_id', 
                              label = 'Genes ID (GE, IC)', 
-                             choices = list('Genes ID' = c("hgnc_symbol",
+                             choices = list('Genes ID' = c("",
+                                                           "hgnc_symbol",
                                                            "entrezgene_id", 
-                                                           "ensembl_gene_id"))),
+                                                           "ensembl_gene_id")),
+                             selected = ),
                  # design
                  textInput(inputId = 'design',
                            label = 'Design formula (GE)', 
-                           placeholder = 'Cell + Treatment + Cell:Treatment'),                
+                           placeholder = 'Example: Cell + Treatment + Cell:Treatment'),                
                  # ref_level
                  selectInput(inputId = 'ref_level',
                              label = 'Reference level: Name of the grouping variable (GE)',
@@ -156,7 +167,7 @@ ui <- navbarPage(
                  textInput(inputId = 'colors',
                            label = 'Colors: Indicate the color for each sample group
                            separated by commas (GE, GV, IC)',
-                           placeholder = 'black, orange'), 
+                           placeholder = 'Example: black, orange'), 
                 
               
               
@@ -193,6 +204,29 @@ ui <- navbarPage(
                               min = 0, 
                               max = 1,
                               step = 0.05),
+                 # gsva_gmt
+                 selectInput(inputId = 'gsva_gmt',
+                             label = 'Select genesets for GSVA (GE)',
+                             choices = list('Gene set collection' = c('Hallmark',
+                                                                      'Same as for GSEA'))),
+                 # gsva_method
+                 selectInput(inputId = 'gsva_method',
+                             label = 'GSVA method (GE)',
+                             choices = list('Gene set collection' = c('gsva',
+                                                                      'ssgsea',
+                                                                      'zscore'))),
+                 
+                 tags$strong('GSVA Heatmap options'),
+                     # gsva_rownames
+                     checkboxInput(inputId = 'gsva_rownames', 
+                                   label = 'Show row names in GSVA plot (GE)', 
+                                   value = TRUE, 
+                                   width = NULL),
+                     # gsva_colnames
+                     checkboxInput(inputId = 'gsva_colnames', 
+                                   label = 'Show  column names in GSVA plot (GE)', 
+                                   value = TRUE, 
+                                   width = NULL),
                  # indications
                  selectInput(inputId = 'indications', 
                              label = 'Cancer types: TCGA Study Abbreviations (IC)', 
@@ -257,7 +291,7 @@ ui <- navbarPage(
             ),
           
           
-          ## Execution button -----------------------------------------------
+        ## Execution button -----------------------------------------------
           tabPanel(
             title = '4. Run GEGVIC',
             wellPanel(
@@ -291,7 +325,21 @@ ui <- navbarPage(
             ## 3. GSEA (cluster + wordclouds)
             tags$h1('Differentially Expressed Genes'),
             
-            tabsetPanel(id = 'de_tables')
+            tabsetPanel(id = 'de_tables'),
+            
+            # GSVA
+            wellPanel(
+              tags$h1('GSVA'),
+              ## Heatmap
+              tags$h4('Heatmap'),
+              plotOutput(outputId = 'gsva',height = '1000px'),
+              ## Table with the results
+              tags$h4('Table of Gene Sets Enrichment'),
+              dataTableOutput(outputId = 'gsva_table'),
+              downloadButton(outputId = 'down_gsva_table', 
+                             label = 'Download table'),
+              
+            )
             
         ), # End GE_module
 
@@ -331,10 +379,8 @@ ui <- navbarPage(
                               width = '80%',
                               height = '700px')
                  )
-                 
-                 
-                 
-                 ), # End GV_module
+              
+               ), # End GV_module
 
   #############################################################################        
         # IC_module -----------------------------------------------------         
@@ -346,7 +392,7 @@ ui <- navbarPage(
                    tags$h1('Summary of Predicted Immune Cell Populations'),
                    dataTableOutput(outputId = 'ic_pred_table'),
                    downloadButton(outputId = 'down_ic_pred_table', 
-                                  label = 'Download table'),
+                                  label = 'Download table')
                  ),
                  
                  wellPanel(
@@ -480,19 +526,19 @@ server <- function(input, output, session) {
     })
     
     # Read the CIBERSORT.R file -------------------------------------------
-    shinyFiles::shinyDirChoose(input, 
-                               id = 'cibersort', 
-                               roots = getVolumes()(), 
-                               session = session)
-    cibersort.path <- reactive({
-      paste0(as.character(parseDirPath(roots = getVolumes()()
-                                       ,selection = input$cibersort)),
-             '/')
-    })
+    #shinyFiles::shinyDirChoose(input, 
+    #                           id = 'cibersort', 
+    #                           roots = getVolumes()(), 
+    #                           session = session)
+    #cibersort.path <- reactive({
+    #  paste0(as.character(parseDirPath(roots = getVolumes()()
+    #                                   ,selection = input$cibersort)),
+    #         '/')
+    #})
     
-    output$cibersort.path <- renderText({
-      cibersort.path()
-    })
+    #output$cibersort.path <- renderText({
+    #  cibersort.path()
+    #})
 
     #############################################################################        
     # Click button ---------------------------         
@@ -592,7 +638,6 @@ server <- function(input, output, session) {
           
           clusterProfiler::read.gmt(file$datapath)
           
-          
         })
         
         
@@ -607,22 +652,56 @@ server <- function(input, output, session) {
         })
         
 
-        # biomart
+        # biomart  ------------------------------------------------------------
         biomart <- reactive({
           if(input$biomart == 'ensembl_biomart_GRCh38_p13'){
             GEGVIC::ensembl_biomart_GRCh38_p13
-          } else {
+          } else if(input$biomart == 'ensembl_biomart_GRCh37') {
             GEGVIC::ensembl_biomart_GRCh37
+          } else if(input$biomart == 'ensembl_biomart_GRCm38_p6') {
+            GEGVIC::ensembl_biomart_GRCm38_p6
+          } else {
+            GEGVIC::ensembl_biomart_GRCm39
           }
-        
         })
         
+        # gsva_gmt  -----------------------------------------------------------
+        gsva_gmt <- reactive({
+          if(input$gsva_gmt == 'Hallmark'){
+            'Hallmark'
+          } else {
+            # Ensure the file is uploaded and available
+            req(input$gmt)
+            # Read the name in a new variable 
+            file <- input$gmt
+            # Get the datapath
+            ext <- tools::file_ext(file$datapath)
+            # Validate that the file is a .gmt
+            validate(need(ext == "gmt", "Please upload a gmt file"))
+            # export data_path
+            file$datapath
+          }
+        })
         
         # indications  --------------------------------------------------------
         indications <- reactive({
           
           rep(input$indications, nrow(metadata()))
           
+        })
+        
+        # Cibersort  ----------------------------------------------------------
+        cibersort_R <- reactive({
+          # Read the name in a new variable 
+          file <- input$cibersort_R
+          # export data_path
+          file$datapath
+        })
+        cibersort_LM22 <- reactive({
+          # Read the name in a new variable 
+          file <- input$cibersort_LM22
+          # export data_path
+          file$datapath
         })
         
         # Create a Progress object ---------------------------------------------
@@ -707,14 +786,24 @@ server <- function(input, output, session) {
                                  dataTableOutput(outputId = paste0(n, '_gsea_table')),
                                  downloadButton(outputId = paste0('down_',n, '_gsea_table'), 
                                                 label = 'Download table'),
-                                 #Plot gsea cluster
-                                 tags$h4('Gene Set Clusters'),
-                                 plotOutput(outputId = paste0(n, '_gsea_clust'), 
+                                 # Plot bubble graph
+                                 tags$h4('Bubble Plot'),
+                                 plotOutput(outputId = paste0(n, '_bubble_plot'),
                                             width = '75%',
                                             height = '800px'),
-                                 #Plot gsea wordclouds
+                                 # Plot gsea cluster
+                                 tags$h4('Gene Set Clusters'),
+                                 plotOutput(outputId = paste0(n, '_gsea_clust'), 
+                                            width = '75%'#, height = '800px'
+                                            ),
+                                 # Plot gsea wordclouds
                                  tags$h4('Gene Set Enriched Terms'),
                                  plotOutput(outputId = paste0(n, '_gsea_word'), 
+                                            width = '75%',
+                                            height = '800px'),
+                                 # Plot gsea leading edge
+                                 tags$h4('Gene Set Core Enrichment (Leading Edge)'),
+                                 plotOutput(outputId = paste0(n, '_gsea_core'),
                                             width = '75%',
                                             height = '800px')
                                  )),
@@ -749,11 +838,11 @@ server <- function(input, output, session) {
                 
                 # Generate Output: GSEA
                 setProgress(value = 3, message = 'Calculating GSEA')
-                
+                ## Perform GSEA
                 gsea <- s_gsea(annot_res = annot.res[[x]],
                                gmt = gmt(),
                                gsea_pvalue = input$gsea_pvalue)
-                
+                ## In case no p-value is too restrictive
                 if (names(gsea) == 'no_genesets') {
                   output[[paste0(n, '_no_gsea')]] <- renderText({
                     
@@ -764,7 +853,7 @@ server <- function(input, output, session) {
                  
                 } else {
                   setProgress(value = 7, message = 'Plotting GSEA')
-                  
+                  # Output: GSEA Table
                   output[[paste0(n, '_gsea_table')]] <- DT::renderDataTable(
                     
                     gsea$gsea_result %>% 
@@ -779,7 +868,7 @@ server <- function(input, output, session) {
                                                             "return type === 'display' && data.length > 6 ?",
                                                             "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
                                                             "}")))))
-                  
+                  # Add download button
                   output[[paste0('down_', n, '_gsea_table')]] <- downloadHandler(
                     filename = function(){
                       paste0(n, '_gsea_table.csv')
@@ -792,19 +881,86 @@ server <- function(input, output, session) {
                                 file = f)
                     }
                   )
-                  
+                  # Output: Bubble plot
+                  output[[paste0(n, '_bubble_plot')]] <- renderPlot({
+                    gsea$gs.filt %>%
+                      separate(leading_edge , into= 'tags', sep=',') %>%
+                      separate(tags, into = c('tags', 'core_perc'), sep='=') %>%
+                      separate(core_perc, into = 'core_perc', sep='%') %>%
+                      mutate(core_perc = as.numeric(core_perc)) %>%
+                      dplyr::select(-tags) %>%
+                      ggplot(.,
+                             aes(x= NES,
+                                 y=reorder(ID, NES),
+                                 size= core_perc,
+                                 colour = p.adjust))+
+                      geom_point(alpha=0.5)+
+                      geom_vline(xintercept = 0)+
+                      scale_color_gradient(low = "#FF9900", high = "#FF3300")+
+                      labs(size='% of genes in\n leading edge', colour = 'p.adjust')+
+                      theme_bw()+
+                      theme(panel.grid = element_blank(),
+                            axis.text = element_text(size=12, face = "bold"),
+                            axis.title.y = element_blank(),
+                            axis.title.x = element_text(size=15),
+                            axis.text.x = element_text(size=10),
+                            legend.title = element_text(face='bold', size =8),
+                            legend.text = element_text(size =7))  
+                  })
+                  # Output: GSEA cluster
                   output[[paste0(n, '_gsea_clust')]] <- renderPlot({
                     GSEAmining::gm_dendplot(df = gsea$gs.filt,
                                             hc = gsea$gs.cl)
                   })
-                  
+                  # Output: Plot enriched terms in gene sets names
                   output[[paste0(n, '_gsea_word')]] <- renderPlot({
                          
                     GSEAmining::gm_enrichterms(df = gsea$gs.filt,
                                                hc = gsea$gs.cl)
                   })
+                  # Output: Plot enriched cores (leading edge analysis)
+                  output[[paste0(n, '_gsea_core')]] <- renderPlot({
+                    
+                    GSEAmining::gm_enrichcores(df = gsea$gs.filt,
+                                               hc = gsea$gs.cl)
+                  })
                 }
                 
+          })
+          
+          # Output: GSVA
+          gsva.out <- s_single(counts = counts(),
+                               metadata = metadata(),
+                               genes_id = input$genes_id,
+                               response = input$response,
+                               design = input$design,
+                               biomart = biomart(),
+                               gsva_gmt = gsva_gmt(),
+                               method = input$gsva_method,
+                               colors = colors(),
+                               row.names = input$gsva_rownames,
+                               col.names = input$gsva_colnames)
+        
+          ## Table of predicted gene set values
+          output[['gsva_table']] <- DT::renderDataTable(
+            as.data.frame(gsva.out$gsva_table) %>% 
+              dplyr::mutate_if(is.numeric, function(x) round(x, 3)),
+            options = list(scrollX = TRUE,
+                           pageLength = 10)
+          )
+          
+          output[['down_gsva_table']] <- downloadHandler(
+            filename = function(){
+              'table_gsva.csv'
+            },
+            content = function(f){
+              write.csv(x =  gsva.out$gsva_table,
+                        file = f)
+            }
+          )
+          ## Heatmap
+          output$gsva <- renderPlot({
+            gsva.out$heatmap
           })
         }
         
@@ -890,25 +1046,26 @@ server <- function(input, output, session) {
                                        biomart = biomart())
           
           # Check whether the user defined the CIBERSORT folder
-          if(cibersort.path() == '/'){ 
+          #if(cibersort.path() == '/'){ 
             # If not set the path to NULL
-            cibersort.final.path <-  NULL
+          #  cibersort.final.path <-  NULL
             
-          } else {
-            cibersort.final.path <- cibersort.path()
-          }
+          #} else {
+          #  cibersort.final.path <- cibersort.path()
+          #}
           
           
           # Immune prediction
           setProgress(value = 9, message = 'Predicting immune cell populations')
           
-          ic.pred <- GEGVIC::ic_deconv(gene_expression = tpm,
-                                       indications = indications(),
-                                       cibersort = cibersort.final.path,
-                                       tumor = TRUE,
-                                       rmgenes = NULL,
-                                       scale_mrna = TRUE,
-                                       expected_cell_types = NULL)
+          ic.pred <- s_deconv(gene_expression = tpm,
+                                      indications = indications(),
+                                      cibersort_R = cibersort_R(),
+                                      cibersort_LM22 = cibersort_LM22(),
+                                      tumor = TRUE,
+                                      rmgenes = NULL,
+                                      scale_mrna = TRUE,
+                                      expected_cell_types = NULL)
           
           # Generate Output: Table of predicted immune cell populations
           output[['ic_pred_table']] <- DT::renderDataTable(
