@@ -87,16 +87,23 @@ ui <- navbarPage(
             ),
           actionButton(inputId = 'to_input', 
                        label = 'Next section',
-                       class = 'btn-primary')
+                       class = 'btn-primary'),
+          br(),
+          tags$hr(),
+          # Download sample data
+          tags$h3('Sample Data'),
+          downloadButton(outputId = 'down_sample_data', 
+                         label = 'Download Sample Data')
+         
         ),
         
         ## Inputs ----------------------------------------------------
-        # Input: RNA-seq raw counts
         tabPanel(
           title = '2. Inputs',
-          wellPanel(
+          wellPanel( 
             tags$h3('Upload necessary inputs'),
             tags$hr(),
+            # Input: RNA-seq raw counts
             fileInput(inputId = "counts", 
                       label = 'RNA-seq raw counts (GE, IC)',
                       accept = c('.csv')),
@@ -116,8 +123,11 @@ ui <- navbarPage(
             # Input: gmt
             fileInput(inputId = "gmt", 
                       label = 'Gene sets (as .gmt file) (GE)',
-                      accept = c('.gmt')),
-        
+                      accept = c('.gmt'))
+            ),
+          wellPanel(
+            tags$h3('Optional: CIBERSORT'),
+            tags$hr(),
             # cibersort
             fileInput(inputId = "cibersort_R", 
                       label = 'CIBERSORT: .R file (IC)',
@@ -128,7 +138,14 @@ ui <- navbarPage(
             ),
           actionButton(inputId = 'to_parameters', 
                        label = 'Next section',
-                       class = 'btn-primary')
+                       class = 'btn-primary'),
+          
+          ## Add javascript code so when opening tab it scrolls to the top
+          tags$script("$(document).ready(function () {
+                        $('#to_parameters').on('click', function (e) {
+                        window.scrollTo(0, 0)
+                        });                 
+                      });")
         ),
   
   
@@ -158,10 +175,7 @@ ui <- navbarPage(
                  textInput(inputId = 'colors',
                            label = 'Colors: Indicate the color for each sample group
                            separated by commas (GE, GV, IC)',
-                           placeholder = 'Example: black, orange'), 
-                
-              
-              
+                           placeholder = 'Example: black, orange'),
                  # shrink
                  selectInput(inputId = 'shrink', 
                              label = 'Shrinkage method (GE)', 
@@ -467,6 +481,21 @@ server <- function(input, output, session) {
                       selected = '4. Run GEGVIC')
   })
     
+  
+  
+  #############################################################################        
+  # Download button Sample Data ------------------------------------------------         
+  #############################################################################       
+  
+  output$down_sample_data <- downloadHandler(
+    filename = function(){
+      'sample_data.zip'
+    },
+    content = function(file){
+      file.copy('www/sample_data.zip', file)
+    },
+    contentType = "application/zip"
+  )
   
     #############################################################################        
     # Automatic detection of colnames in the metadata---------------------------         
