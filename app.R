@@ -10,6 +10,8 @@ library(ggplot2)
 library(ggrepel)
 library(ggpubr)
 library(ggplotify)
+library(patchwork)
+library(gridExtra)
 library(rlang)
 library(pheatmap)
 library(deconstructSigs)
@@ -424,8 +426,8 @@ ui <- navbarPage(
                  # Plot IPG and IPS
                  wellPanel(
                    tags$h1('Immune Score'),
-                   plotOutput(outputId = 'ic_phenogram',
-                              height = '800px'),
+                   #plotOutput(outputId = 'ic_phenogram',
+                   #          height = '800px'),
                    plotOutput(outputId = 'ic_score', 
                               width = '75%',
                               height = '600px'),
@@ -433,7 +435,11 @@ ui <- navbarPage(
                    tags$h4('Results Table'),
                    dataTableOutput(outputId = 'ips_table'),
                    downloadButton(outputId = 'down_ips_table', 
-                                  label = 'Download table')
+                                  label = 'Download table'),
+                   # Immunophenogram 
+                   tags$h4('Immunophenogram'),
+                   downloadButton(outputId = 'ic_phenogram', 
+                                  label = 'Download report')
                  )
                 
               ) # End IC_module
@@ -1164,15 +1170,16 @@ server <- function(input, output, session) {
                                 colors = colors())
           
           ## Output: Plot IPG
-          output$ic_phenogram <- renderPlot({
-            ic.IPS_IPG$immunophenoGram
-          })
+          #output$ic_phenogram <- renderPlot({
+          #  ic.IPS_IPG$immunophenoGram
+          #})
           
           ## Output: Plot IPS
           output$ic_score<- renderPlot({
             ic.IPS_IPG$immunophenoScore
           })
           
+         
           ## Output: Predictions Table
           output[['ips_table']] <- DT::renderDataTable(
             as.data.frame(ic.IPS_IPG$ips_table) %>% 
@@ -1191,6 +1198,17 @@ server <- function(input, output, session) {
             }
           )
           
+          ## Output: Download IPG report in pdf
+          output[['ic_phenogram']] <- downloadHandler(
+            filename = function(){
+              'immunophenogram_report.pdf'
+            },
+            content = function(f){
+              ggsave(filename = f, 
+                     plot = ic.IPS_IPG$immunophenoGram, 
+                     device = 'pdf')
+            }
+          )
         }
         
       }) # End progress bar
