@@ -1,10 +1,11 @@
 s_mut_signatures <- function(muts,
-                              metadata,
-                              response,
-                              gbuild = 'BSgenome.Hsapiens.UCSC.hg19',
-                              mut_sigs = 'COSMIC_v2_SBS_GRCh37',
-                              tri.counts.method = 'default',
-                              colors = c('black', 'orange')) {
+                             metadata,
+                             response,
+                             gbuild = 'BSgenome.Hsapiens.UCSC.hg19',
+                             mut_sigs = 'COSMIC_v2_SBS_GRCh37',
+                             tri.counts.method = 'default',
+                             colors = c('black', 'orange'),
+                             col.names = TRUE) {
     
     # Transform response to symbol for later use (instead of enquote)
     response <-  rlang::sym(response)
@@ -18,21 +19,21 @@ s_mut_signatures <- function(muts,
     if (grepl('SBS', mut_sigs, ignore.case = TRUE) == TRUE) {
         # Filter mutations of SNP type
         mut.filt <- muts %>%
-            dplyr::filter(Variant_type == 'SNP')
+            dplyr::filter(Variant_Type == 'SNP')
         # Define sig.type as SBS
         sig_type <- 'SBS'
         
     } else if (grepl('DBS', mut_sigs, ignore.case = TRUE) == TRUE) {
         # Filter mutations of DNP type
         mut.filt <- muts %>%
-            dplyr::filter(Variant_type == 'DNP')
+            dplyr::filter(Variant_Type == 'DNP')
         # Define sig.type as DBS
         sig_type <- 'DBS'
         
     } else {
         # Filter mutations of INS or DEL type
         mut.filt <- muts %>%
-            dplyr::filter(Variant_type %in% c('INS', 'DEL'))
+            dplyr::filter(Variant_Type %in% c('INS', 'DEL'))
         # Define sig.type as SBS
         sig_type <- 'ID'
         
@@ -106,19 +107,26 @@ s_mut_signatures <- function(muts,
         labs(fill = 'Signatures') +
         
         # Themes
-        theme_linedraw() +
+        theme_bw() +
         theme(
             plot.title = element_text(size = 15, hjust = 0.5, face = 'bold'),
             #axis.text.x.bottom = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_blank(),
-            axis.text.x = element_text(size = 5, angle = 45, hjust = 1)
+            axis.text.x = element_text(size = 5, angle = 45, hjust = 1),
+            strip.background = element_rect(
+                color="black", fill="black", size=1.5, linetype="solid"),
+            strip.text = element_text(color = 'white')
         ) +
         
         # Faceting
         facet_wrap(facets = vars(!!response),
                    scales = 'free_x')
     
+    ## Eliminate sample names if the user decides so
+    if(col.names == FALSE){
+        bar.plot <- bar.plot + theme(axis.text.x = element_blank())
+    }
     
     ## Heatmap  ------------------------------------------------------------
     # Format signature predictions object in a wide format: Pivot wider
@@ -160,6 +168,7 @@ s_mut_signatures <- function(muts,
                                                      order(match(colnames(wide.results.extr),
                                                                  rownames(pheat.meta)))]),
                          color = ggpubr::get_palette(palette = 'Purples', k = 10),
+                         show_colnames = col.names,
                          scale = 'none',
                          cluster_rows = FALSE,
                          cluster_cols = FALSE,

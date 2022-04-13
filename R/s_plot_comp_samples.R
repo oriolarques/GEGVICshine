@@ -1,9 +1,10 @@
 s_plot_comp_samples <- function(df,
-                                 metadata,
-                                 response,
-                                 compare = NULL,
-                                 p_label = 'p.format',
-                                 colors = c('black', 'orange')) {
+                                metadata,
+                                response,
+                                compare = NULL,
+                                p_label = 'p.format',
+                                colors = c('black', 'orange'),
+                                points = TRUE) {
     
     # Create an object to process the data
     temp_df <- NULL
@@ -80,14 +81,17 @@ s_plot_comp_samples <- function(df,
         ggtitle('Immune composition:\nBetween groups comparison per population') +
         
         # Themes
-        theme_linedraw() +
+        theme_bw() +
         theme(
             plot.title = element_text(size = 15, hjust = 0.5, face = 'bold'),
             axis.text.x.bottom = element_blank(),
             axis.title.x = element_blank(),
             axis.title.y = element_blank(),
             axis.text.x = element_text(angle = 45, hjust = 1),
-            legend.position = 'bottom'
+            legend.position = 'bottom',
+            strip.background = element_rect(
+                color="black", fill="black", size=1.5, linetype="solid"),
+            strip.text = element_text(color = 'white')
         ) +
         
         # Faceting
@@ -104,6 +108,12 @@ s_plot_comp_samples <- function(df,
                                        label.x.npc = 0.3,
                                        show.legend = FALSE)
         
+    }
+    
+    # Add points to the plot
+    if(points == TRUE){
+        p <- p +
+            geom_point(alpha = 0.5, position = position_jitter(0.2))
     }
     
     # Return the plot
