@@ -35,7 +35,7 @@ source(file = 'R/s_single.R', local = TRUE)
 
 
 # Increment input file size available for gmt files.
-options(shiny.maxRequestSize = 20*1024^2)
+options(shiny.maxRequestSize = 100*1024^2)
 
 
 #############################################################################        
@@ -223,7 +223,7 @@ ui <- navbarPage(
                                                                       'ssgsea',
                                                                       'zscore'))),
                  
-                 tags$strong('GSVA Heatmap options'),
+                 tags$strong('Advanced plot options'),
                      # gsva_rownames
                      checkboxInput(inputId = 'gsva_rownames', 
                                    label = 'Show row names in GSVA plot (GE)', 
@@ -231,9 +231,19 @@ ui <- navbarPage(
                                    width = NULL),
                      # gsva_colnames
                      checkboxInput(inputId = 'gsva_colnames', 
-                                   label = 'Show  column names in GSVA plot (GE)', 
+                                   label = 'Show column names in GSVA plot (GE)', 
                                    value = TRUE, 
                                    width = NULL),
+                    # mut_colnames
+                    checkboxInput(inputId = 'mut_colnames', 
+                                  label = 'Show column names in Oncoplot and Mutational Signature analyses (GV)', 
+                                  value = TRUE, 
+                                  width = NULL),
+                    # ic_samples_points
+                    checkboxInput(inputId = 'ic_samples_points', 
+                                  label = 'Show points in immune prediction plots (IC)', 
+                                  value = TRUE, 
+                                  width = NULL),
                  # indications
                  selectInput(inputId = 'indications', 
                              label = 'Cancer types: TCGA Study Abbreviations (IC)', 
@@ -1012,6 +1022,7 @@ server <- function(input, output, session) {
                        metadata = metadata(),
                        response = input$response,
                        top_genes = input$top_genes,
+                       col.names = input$mut_colnames,
                        colors = colors())
             
           })
@@ -1061,7 +1072,8 @@ server <- function(input, output, session) {
                                        response = input$response,
                                        gbuild = input$gbuild,
                                        mut_sigs = input$mut_sigs,
-                                       colors = colors())
+                                       colors = colors(),
+                                       col.names = input$mut_colnames)
           ## Output: Bar plot
           output$mut_sigs_bar <- renderPlot({
             
@@ -1141,15 +1153,16 @@ server <- function(input, output, session) {
           output$ic_samples <- renderPlot({
             
             s_plot_comp_samples(df = ic.pred,
-                                 metadata = metadata(),
-                                 response = input$response,
-                                 compare = input$compare,
-                                 p_label = input$p_label,
-                                 colors = colors())
+                                metadata = metadata(),
+                                response = input$response,
+                                compare = input$compare,
+                                p_label = input$p_label,
+                                colors = colors(),
+                                points = input$ic_samples_points)
             
           })
           
-          ## Output: Plot immune prediction comparison by sample
+          ## Output: Plot immune prediction comparison within samples
           output$ic_type <- renderPlot({
             
             s_plot_comp_celltypes(df = ic.pred,

@@ -10,7 +10,8 @@ s_pca <- function(counts,
                                    genes_id = genes_id)
     
     # Preprocess metadata
-    metadata <- preprocess_ge_meta(metadata = metadata)
+    metadata <- preprocess_ge_meta(metadata = metadata,
+                                   counts = counts)
     
     # Create DESeq2Dataset object
     dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts,

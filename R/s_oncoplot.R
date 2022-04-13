@@ -1,8 +1,10 @@
 s_oncoplot <- function(muts,
-                          metadata,
-                          response,
-                          top_genes = 10,
-                          colors = c('black' ,'orange')){
+                       metadata,
+                       response,
+                       top_genes = 10,
+                       col.names = TRUE,
+                       colors = c('black' ,'orange')
+                       ){
     
     # Transform response to symbol for later use (instead of enquote)
     response <- rlang::sym(response)
@@ -43,7 +45,7 @@ s_oncoplot <- function(muts,
                        clinicalFeatures = quoted.resp,
                        genes = NULL,
                        sampleOrder = samples_order,
-                       showTumorSampleBarcodes = TRUE,
+                       showTumorSampleBarcodes = col.names,
                        sortByAnnotation = TRUE,
                        annotationColor = cols.list)
     par(mfrow = c(1,1))
