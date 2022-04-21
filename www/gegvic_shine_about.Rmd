@@ -1,0 +1,49 @@
+---
+title: "About GEGVICshine"
+output: 
+    html_document:
+        theme: cosmo
+---
+
+-------------------------
+
+GEGVIC is a workflow to analyse Gene Expression, Genetic Variations and Immune cell Composition of tumour samples using Next Generation Sequencing data. This is a common need in the majority of the laboratories in the world, however, many times the high variety of tools available to perform each individual task can confuse and difficult the process. It comes in two flavours: 
+
+## GEGVIC
+
+An easy-to-use tool in a form of an R package that requires few input files, provides a good flexibility and produces appealing outputs when comparing a group of samples for (i) differential gene expression, (ii) genetic variations and (iii) immune cell composition.
+
+![](GitHub-Mark-32px.png) [Github page](https://github.com/oriolarques/GEGVIC)
+
+## GEGVICshine
+
+A shiny app with the purpose of offering everything GEGVIC can do while eliminating coding burden and facilitating efficiency for inexperienced users.
+
+![](GitHub-Mark-32px.png) [Github page](https://github.com/oriolarques/GEGVICshine)
+
+<br/>
+
+# Authors
+
+-------------------------
+
+|Oriol Arqués|Laia Bassaganyas|
+|:------------:|:------------:|
+|Research Associate <br/> Stem Cells and Cancer lab <br/> Vall d'Hebron Institute of Oncology|Postdoctoral Researcher <br/> Cancer Bioinformatics and Systems Biology <br/> Institut de Recherche en Cancérologie de Montpellier|
+|oarques@vhio.net|laia.bassaganyas-bars@inserm.fr|
+|||
+
+
+# Support
+
+-------------------------
+<center>
+![](vhio-r-logo-ca.png){width=30%}
+<center/>
+
+<br/>
+<br/>
+
+
+
+

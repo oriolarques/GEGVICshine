@@ -51,17 +51,6 @@ ui <- navbarPage(
     
     selected = 'Parameters',
     
-    #############################################################################        
-    # Manual -----------------------------------------------------         
-    #############################################################################        
-    tabPanel(title = 'Getting started',
-             
-             fluidPage(
-               htmlOutput(outputId = 'manual')
-               )
-             
-    ), # End Manual section
-    
     tabPanel(title = 'Parameters',
   #############################################################################        
         # User parameters -----------------------------------------------------          
@@ -452,8 +441,27 @@ ui <- navbarPage(
                                   label = 'Download report')
                  )
                 
-              ) # End IC_module
+              ), # End IC_module
 
+  #############################################################################        
+  # About and Getting started --------------------------------------------------         
+  #############################################################################        
+  tabPanel(title = 'About',
+           fluidPage(
+               htmlOutput(outputId = 'about')
+           )
+  ),
+  
+  tabPanel(title = 'Getting started',
+           fluidPage(
+               htmlOutput(outputId = 'manual')
+           )
+           
+  ), # End Manual section
+  
+  # Align these two tabs to the right
+  tags$head(tags$style('.navbar-nav :nth-child(5) {float:right}
+                          .navbar-nav :nth-child(6) {float:right}'))
 )
 
 #############################################################################        
@@ -464,8 +472,15 @@ ui <- navbarPage(
 server <- function(input, output, session) {
   
   #############################################################################        
-  # Include the GEGVICshine manual page in HTML ---------------------------         
+  # Include the GEGVICshine About and Getting started page in HTML ------------         
   #############################################################################       
+
+  output$about <- renderUI({
+      tags$iframe(seamless="seamless",
+                  src = 'gegvic_shine_about.html', 
+                  width = '100%',  
+                  height = 1000,  style = "border:none;")
+  })  
   
   output$manual <- renderUI({
     tags$iframe(seamless="seamless",
@@ -476,7 +491,7 @@ server <- function(input, output, session) {
   
   
   #############################################################################        
-  # Buttons to switch sections in parameters tab ---------------------------         
+  # Buttons to switch sections in parameters tab ------------------------------        
   #############################################################################       
   
   observeEvent(input$to_input, {
