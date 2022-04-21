@@ -12,17 +12,60 @@ Together they create a workflow to analyse **G**ene **E**xpression,
 **G**enetic **V**ariations and **I**mmune cell **C**omposition of tumour
 samples using Next Generation Sequencing data.
 
-Presently GEGVICshine can only be used locally. For that use the
-following command on your terminal:
+## Installation
+
+GEGVICshine can be used through VHIO’s server. However, the
+computational power of this server is limited. For this reason, analyses
+involving more than 50 samples are discouraged. In case more power is
+required, we recommend using GEGVICshine locally.
+
+### Online usage
+
+GEGVICshine can be accessed through the following link:
+<https://gegvic.vhio.net/>
+
+### Local usage
+
+To use GEGVICshine locally there are two options.
+
+#### Using Docker (Recommended)
+
+-   Install Docker desktop (<https://www.docker.com/get-started/>)
+
+-   Download the GEGVICshine docker image copying the following command
+    in a terminal (<https://hub.docker.com/r/oarques/gegvicshine>).
+
+<!-- -->
+
+    docker pull oarques/gegvicshine
+
+-   In the terminal run
+
+<!-- -->
+
+    docker run -p 80:80 gegvicshine
+
+-   Go to the internet browser (Chrome/Firefox) and type
+
+<!-- -->
+
+    localhost:80
+
+#### Using Rstudio
+
+-   Run the following command in the terminal to get the GEGVICshine
+    GitHub repository:
+
+<!-- -->
 
     git clone https://github.com/oriolarques/GEGVICshine
 
-Or manually download the repository (**app.R** file, **R/** folder and
-**wwww/** folder).
+-   Alternatively, manually download the repository (**app.R** file,
+    **R/** folder and **wwww/** folder).
 
-In R, since the `GEGVIC` package requires many dependencies, it is
-recommended to execute the following code before the first usage to
-prepare the environment correctly.
+-   In Rstudio, since the `GEGVIC` package requires many dependencies,
+    it is recommended to execute the following code before the first
+    usage to prepare the environment correctly.
 
 ``` r
 # CRAN packages 
@@ -68,7 +111,9 @@ devtools::install_github('raerose01/deconstructSigs')
 devtools::install_github("oriolarques/GEGVIC")
 ```
 
-Then run the `GEGVICshine` app using the following code:
+-   Then run the `GEGVICshine` app using the following code:
+
+<!-- -->
 
     shiny::runApp('path to the app.R file')
 
@@ -77,7 +122,7 @@ Then run the `GEGVICshine` app using the following code:
 *This section details how to use the `GEGVICshine` app. The same
 information can be located in the tab Getting started within the app.*
 
-With `GEGVICshine`, the user is guided through the different steps
+Within `GEGVICshine`, the user is guided through the different steps
 necessary to perform all the analyses. This includes the uploading of
 the input files and all the tuning parameters that can be modified to
 personalise the outputs. This vignette explores all the options present
@@ -89,19 +134,21 @@ The interface of the app is quite simple, with a top panel containing
 the different tabs that the user can use to set the analysis parameters
 and to visualise the results:
 
--   Getting started
 -   Parameters
 -   GE_module (Gene Expression module)
 -   GV_module (Genetic Variations module)
 -   IC_module (Immune cell Composition module)
+-   Getting started
+-   About
 
-![](www/01_GEGVICshine_default_tab.png)
+![](www/01_GEGVICshine_tabs.png)
 
 ### 2. App Sections
 
-#### 2.1. Getting started
+#### 2.1. Getting started & About
 
-This tab is where you can find the present manual page.
+This tab is where you can find the present manual page. And information
+about the project.
 
 #### 2.2. Parameters
 
@@ -119,16 +166,25 @@ Variations) or **IC** for the IC_module (Immune cell Composition).
 
 The parameters sub-tabs are:
 
-##### 1. Modules selection
+##### 1. Modules selection & Sample Data
 
 Click to select which of the modules (either one, two or all three) will
 be included in the analysis.
+
+There is an additional button to download sample input data. These can
+be used to reproduce the results from this manual.
+
+![](www/02_1_GEGVICshine_module_selection.png)
 
 ##### 2. Inputs
 
 Here the user need to upload the necessary input files:
 
-![](www/02_GEGVICshine_inputs_subtab.png)
+![](www/02_2_GEGVICshine_inputs_subtab_1.png)
+![](www/02_2_GEGVICshine_inputs_subtab_2.png)
+
+**All files must be .csv files (comma separated values) except for the
+gene sets that must be in the form of a .gmt file.**
 
 -   **RNA-sequencing raw counts**: Table containing raw gene counts as
     rows and samples as columns. The first column must contain gene
@@ -136,6 +192,8 @@ Here the user need to upload the necessary input files:
     and its column name MUST be adequately named as either:
     **entrezgene_id**, **ensembl_gene_id** or **hgnc_symbol**
     respectively.
+
+![](www/input_counts.png)
 
 -   **Genetic variations**: Table containing short variant calls.
     Necessary columns MUST have the following names (following the MAF
@@ -155,11 +213,19 @@ Here the user need to upload the necessary input files:
     polymorphism), ‘INS’ (Insertion), ‘DEL’ (Deletion). –
     Tumor_Sample_Barcode: Sample name.
 
--   **Samples metadata**:Table that contains additional information to
+![](www/input_muts.png)
+
+-   **Samples metadata**: Table that contains additional information to
     the samples to create groups such as response to a therapy. The
     first column MUST be named **Samples** and contain the same
     nomenclature for each sample as in the RNA-sequencing raw counts and
     Genetic variations data tables.
+
+![](www/input_metadata.png)
+
+-   **Select the response variable**: Once the metadata file is
+    uploaded, the user must select which variable will be used as
+    grouping variable in all of the different analyses.
 
 -   **Gene set collections to be analysed by GSEA in a form of a .gmt
     file**: Those files can be downloaded from the Molecular Signatures
@@ -169,19 +235,11 @@ Here the user need to upload the necessary input files:
     In the case of working with mouse data gmt files can be found
     [here](https://bioinf.wehi.edu.au/MSigDB/).
 
-All files must be .csv files (comma separated values) except for the
-gene sets that must be in the form of a .gmt file. Example files can be
-obtained from the GEGVIC package or using the following
-[link](https://github.com/oriolarques/GEGVIC/tree/main/inst/extdata).
-
--   **Select folder in your computer containing: CIBERSORT.R and
-    LM22.txt files (IC)**: As the title indicates, the user need to
-    navigate through the system folders to indicate the folder where
-    CIBERSORT.R and LM22.txt files are stored. *To use the CIBERSORT
-    algorithm, the user need to register on the CIBERSORT web page
-    (<https://cibersort.st> anford.edu), obtain a license and download
-    the source code in form of two files CIBERSORT.R and LM22.txt.
-    Finally, both files should be stored in the same folder.*
+-   *To use the CIBERSORT algorithm, the user need to register on the
+    CIBERSORT web page (<https://cibersort.st> anford.edu), obtain a
+    license and download the source code in form of two files
+    CIBERSORT.R and LM22.txt. Then both files need to be uploaded in the
+    corresponding space.*
 
 ##### 3. Parameters:
 
@@ -192,7 +250,11 @@ options selected by default, whereas in the case of the text parameters
 the box contains a character string giving the user a hint as to what
 can be entered.
 
-![](www/03_GEGVICshine_parameters_subtab.png)
+![](www/03_GEGVICshine_parameters_subtab_1.png)
+
+![](www/03_GEGVICshine_parameters_subtab_2.png)
+
+![](www/03_GEGVICshine_parameters_subtab_3.png)
 
 -   **Genes ID (GE, IC)**: Name of the column that contains gene
     identifiers (entrezgene_id, ensembl_gene_id or hgnc_symbol).
@@ -202,7 +264,7 @@ can be entered.
     Cell + Treatment + Cell:Treatment)
 
 -   **Reference level (GE)**: Name of the grouping variable in the
-    metadata.
+    metadata that will be used as the reference to be compared against.
 
 -   **Colors**: Indicate the color for each sample group separated by
     commas (GE, GV, IC).
@@ -229,6 +291,17 @@ can be entered.
 
 -   **Adjusted p-value for GSEA (GE)**: Numeric value to define the
     adjusted pvalue cutoff in GSEA. Set to 0.2 by default.
+
+-   **Select genesets for GSVA (GE)**: List of options to choose whether
+    the gene sets that will be used for GSVA are those from the Hallmark
+    [collection](http://www.gsea-msigdb.org/gsea/msigdb/index.jsp) or
+    the same that where indicated for GSEA.
+
+-   **GSVA method (GE)**: List of the methods available for GSVA. Either
+    *gsva*, *ssgsea* or *zscore*.
+
+-   **Advanced plot options**: Check boxes to decided whether column- or
+    row-names or points should be added in specific plots.
 
 -   **Cancer types: TCGA Study Abbreviations (IC)**: List of TCGA study
     abbreviations. For more information visit the following
@@ -316,8 +389,10 @@ will be shown:
 cutoff defined by the user, a message will be shown instead of the table
 and figures.*
 
-![](www/09_table_gsea.png) ![](www/10_gsea_cluster.png)
-![](www/11_gsea_wordcloud.png)
+![](www/09_table_gsea.png) ![](www/10_bubble_plot.png)
+![](www/11_gsea_cluster.png) ![](www/12_gsea_wordcloud.png)
+![](www/13_leading_edge.png) ![](www/14_gsva_heatmap.png)
+![](www/15_gsva_table.png)
 
 #### 2.4. GV_module
 
@@ -332,18 +407,18 @@ whereas mutational signatures are predicted using the `deconstructSigs`
     the mutations, including the type of variations, the proportion of
     base changes or the number of mutations per sample.
 
-![](www/12_mutational_summary.png)
+![](www/16_mutational_summary.png)
 
 -   **Oncolplot** with the most frequently mutated genes (number defined
     by the user).
 
-![](www/13_oncoplot.png)
+![](www/16_oncoplot.png)
 
 -   **Mutational load**: Here, the mutational load, defined as the total
     number of mutations per sample, will be calculated per each sample
     and a comparison by groups will be shown.
 
-![](www/14_mutational_load.png)
+![](www/17_mutational_load.png) ![](www/18_mutational_load_table.png)
 
 -   **Mutational signatures**: Giving the selected version of the genome
     and the COSMIC matrix, the server will predict the contribution of
@@ -353,8 +428,9 @@ whereas mutational signatures are predicted using the `deconstructSigs`
     groups), whereas the second figure is a heatmap showing the
     contribution of all predicted mutational signatures per sample.
 
-![](www/15_mutational_signatures_bars.png)
-![](www/16_mutational_signatures_heatmap.png)
+![](www/19_mutational_signatures_bars.png)
+![](www/20_mutational_signatures_heatmap.png)
+![](www/21_mutational_signatures_table.png)
 
 #### 2.5. IC_module
 
@@ -371,14 +447,14 @@ CIBERSORT.
     Like them, there is also download button to obtain the full table in
     a form of a .csv file.
 
-![](www/17_table_ic.png)
+![](www/22_table_ic.png)
 
 -   **Immune composition cell types comparison by groups**: A plot were
     each immune cell type is compared between sample groups within all
     the six prediction methods. CIBERSORT result will only be shown if
     the user specifies a local folder.
 
-![](www/18_ic_by_group.png)
+![](www/23_ic_by_group.png)
 
 -   **Immune composition: Cell types comparison within samples**: A plot
     were the predicted percentage of each immune cell type is show for
@@ -386,7 +462,7 @@ CIBERSORT.
     compare cell types within a sample. CIBERSORT result will only be
     shown if the user specifies a local folder.
 
-![](www/19_ic_within_samples.png)
+![](www/24_ic_within_samples.png)
 
 -   **Immune Score**: The last two plots contain immunophenogram (IPG)
     and immunophenoscores (IPS) for each sample and each group of study.
@@ -396,4 +472,6 @@ CIBERSORT.
     further interpretation please visit [The Cancer Immunome
     Atlas](https://tcia.at/tools/toolsMain).
 
-![](www/20_immunophenogram.png) ![](www/21_immunophenoscore.png)
+![](www/25_ipg.png) ![](www/26_immunophenoscore.png)
+
+![](www/27_ips_table.png)
