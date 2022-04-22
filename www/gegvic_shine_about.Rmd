@@ -7,7 +7,9 @@ output:
 
 -------------------------
 
-GEGVIC is a workflow to analyse Gene Expression, Genetic Variations and Immune cell Composition of tumour samples using Next Generation Sequencing data. This is a common need in the majority of the laboratories in the world, however, many times the high variety of tools available to perform each individual task can confuse and difficult the process. It comes in two flavours: 
+GEGVIC is a workflow to analyse Gene Expression, Genetic Variations and Immune cell Composition of tumour samples using Next Generation Sequencing data. This is a common need in the majority of the laboratories in the world, however, many times the high variety of tools available to perform each individual task can confuse and difficult the process. 
+
+It comes in two different flavours: 
 
 ## GEGVIC
 

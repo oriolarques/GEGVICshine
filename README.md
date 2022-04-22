@@ -15,9 +15,10 @@ samples using Next Generation Sequencing data.
 ## Installation
 
 GEGVICshine can be used through VHIO’s server. However, the
-computational power of this server is limited. For this reason, analyses
-involving more than 50 samples are discouraged. In case more power is
-required, we recommend using GEGVICshine locally.
+computational power of this server is limited. For this reason,
+**analyses on the server involving more than 50 samples are
+discouraged**. In case more resources are required, we recommend using
+GEGVICshine locally.
 
 ### Online usage
 
@@ -184,7 +185,8 @@ Here the user need to upload the necessary input files:
 ![](www/02_2_GEGVICshine_inputs_subtab_2.png)
 
 **All files must be .csv files (comma separated values) except for the
-gene sets that must be in the form of a .gmt file.**
+gene sets that must be in the form of a .gmt file.** The format of each
+specific file should be as follows:
 
 -   **RNA-sequencing raw counts**: Table containing raw gene counts as
     rows and samples as columns. The first column must contain gene
@@ -198,20 +200,33 @@ gene sets that must be in the form of a .gmt file.**
 -   **Genetic variations**: Table containing short variant calls.
     Necessary columns MUST have the following names (following the MAF
     format: <https://docs.gdc.cancer.gov/Data/File_Formats/MAF>
-    \_Format/): – Hugo_Symbol: Gene symbol from HGNC. – Chromosome:
-    Affected chromosome. – Start_Position: Mutation start coordinate. –
-    End_Position: Mutation end coordinate. – Reference_Allele: The plus
-    strand reference allele at this position. Includes the deleted
-    sequence for a deletion or “-” for an insertion. –
-    Tumor_Seq_Allele2: Tumor sequencing discovery allele. –
-    Variant_Classification: Translational effect of variant allele. Can
-    be one of the following: Frame_Shift_Del, Frame_Shift_Ins,
+    \_Format/):
+
+    – Hugo_Symbol: Gene symbol from HGNC.
+
+    – Chromosome: Affected chromosome.
+
+    – Start_Position: Mutation start coordinate.
+
+    – End_Position: Mutation end coordinate.
+
+    – Reference_Allele: The plus strand reference allele at this
+    position. Includes the deleted sequence for a deletion or “-” for an
+    insertion.
+
+    – Tumor_Seq_Allele2: Tumor sequencing discovery allele.
+
+    – Variant_Classification: Translational effect of variant allele.
+    Can be one of the following: Frame_Shift_Del, Frame_Shift_Ins,
     In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation,
     Silent, Splice_Site, Translation_Start_Site, Nonstop_Mutation, RNA,
-    Targeted_Region. – Variant_type: Type of mutation. Can be: ‘SNP’
-    (Single nucleotide polymorphism), ‘DNP’ (Double nucleotide
-    polymorphism), ‘INS’ (Insertion), ‘DEL’ (Deletion). –
-    Tumor_Sample_Barcode: Sample name.
+    Targeted_Region.
+
+    – Variant_type: Type of mutation. Can be: ‘SNP’ (Single nucleotide
+    polymorphism), ‘DNP’ (Double nucleotide polymorphism), ‘INS’
+    (Insertion), ‘DEL’ (Deletion).
+
+    – Tumor_Sample_Barcode: Sample name.
 
 ![](www/input_muts.png)
 
@@ -236,19 +251,19 @@ gene sets that must be in the form of a .gmt file.**
     [here](https://bioinf.wehi.edu.au/MSigDB/).
 
 -   *To use the CIBERSORT algorithm, the user need to register on the
-    CIBERSORT web page (<https://cibersort.st> anford.edu), obtain a
+    CIBERSORT web page (<https://cibersort.stanford.edu>), obtain a
     license and download the source code in form of two files
     CIBERSORT.R and LM22.txt. Then both files need to be uploaded in the
     corresponding space.*
 
 ##### 3. Parameters:
 
-This section contains several parameters in three different flavours,
+This section contains several parameters that need to be completed
 either as a drop-down list, an empty space to be filled in with text or
-with numeric values. List and numeric parameters contain one of the
-options selected by default, whereas in the case of the text parameters
-the box contains a character string giving the user a hint as to what
-can be entered.
+with numeric values or as checkboxes. List and numeric parameters
+contain one of the options selected by default, whereas in the case of
+the text parameters the box contains a character string giving the user
+a hint as to what can be entered.
 
 ![](www/03_GEGVICshine_parameters_subtab_1.png)
 
@@ -282,8 +297,8 @@ can be entered.
     *Mus musculus* samples..
 
 -   **Fold Change (GE)**: An integer to define the fold change value to
-    consider that a gene is differentially expressed. Default value is
-    2.
+    consider that a gene is differentially expressed. Default value
+    is 2.
 
 -   **Adjusted p-value for gene expression data (GE)**: Numeric value to
     define the maximum adjusted p-value to consider that a gene is
@@ -346,13 +361,15 @@ For GSEA, `clusterProfiler`
 [package](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html)
 is used for the analysis and `GSEAmining`
 [package](https://bioconductor.org/packages/release/bioc/html/GSEAmining.html)
-is used for results summary and visualization.
+and `GSVA`
+[package](https://www.bioconductor.org/packages/release/bioc/html/GSVA.html)
+are used for results summary and visualization.
 
 -   **PCA** with all the samples colored as indicated by the user.
 
 ![](www/06_PCA.png)
 
-The next section, entitled *differentially expressed genes*, contains
+The next section, entitled *Differentially Expressed Genes*, contains
 the rest of the analyses in different sub-tabs. There will be one tab
 per each group comparison, and their total number will depend on the
 total number of sample groups. In each case the following information
@@ -379,11 +396,14 @@ will be shown:
 
 -   **Gene Set Enrichment Analysis (GSEA)**: The results of GSEA will be
     shown in a table similar to that from the diferential gene
-    expression. Then, results from the `GSEAmining` package will be
-    plotted. The first is a clustering of the top 20 more enriched gene
-    sets in the analysis. The second plot will be a word cloud for each
-    cluster highlighting the most enriched terms within the gene sets
-    present in that cluster.
+    expression. The resulting top 20 regulated gene sets are shown in a
+    bubble plot where Normalized Enrichment Score (NES) is shown. The
+    size of the bubbles are determined by the percentage of genes in the
+    gene set that belong to the leading edge (core). Then, results from
+    the `GSEAmining` package will be plotted. The first is a clustering
+    of the top 20 more enriched gene sets in the analysis. The second
+    plot will be a word cloud for each cluster highlighting the most
+    enriched terms within the gene sets present in that cluster.
 
 *Note: In the case there are no gene sets enriched with the p-value
 cutoff defined by the user, a message will be shown instead of the table
@@ -391,8 +411,12 @@ and figures.*
 
 ![](www/09_table_gsea.png) ![](www/10_bubble_plot.png)
 ![](www/11_gsea_cluster.png) ![](www/12_gsea_wordcloud.png)
-![](www/13_leading_edge.png) ![](www/14_gsva_heatmap.png)
-![](www/15_gsva_table.png)
+![](www/13_leading_edge.png)
+
+-   **Gene Set Variation Analysis (GSVA)**: Results are shown as a
+    heatmap and the values in a table.
+
+![](www/14_gsva_heatmap.png) ![](www/15_gsva_table.png)
 
 #### 2.4. GV_module
 
@@ -416,17 +440,20 @@ whereas mutational signatures are predicted using the `deconstructSigs`
 
 -   **Mutational load**: Here, the mutational load, defined as the total
     number of mutations per sample, will be calculated per each sample
-    and a comparison by groups will be shown.
+    and a comparison by groups will be shown. Values will be available
+    in a table.
 
 ![](www/17_mutational_load.png) ![](www/18_mutational_load_table.png)
 
 -   **Mutational signatures**: Giving the selected version of the genome
-    and the COSMIC matrix, the server will predict the contribution of
+    and the COSMIC matrix, the app will predict the contribution of
     different mutational signatures in each sample. Then, two
     complementary figures will be plotted. The first is a bar plot
     showing the top four mutational signatures per sample (separated by
     groups), whereas the second figure is a heatmap showing the
-    contribution of all predicted mutational signatures per sample.
+    contribution of all predicted mutational signatures per sample. The
+    values to genereate these plots are shown in the corresponding
+    table.
 
 ![](www/19_mutational_signatures_bars.png)
 ![](www/20_mutational_signatures_heatmap.png)
@@ -434,9 +461,9 @@ whereas mutational signatures are predicted using the `deconstructSigs`
 
 #### 2.5. IC_module
 
-This section contains the results of the predictions of immune cell
-composition of the tumour microenvironment from RNA-sequencing data.
-Predictions are made using the `inmmunedeconv`
+This section contains the predictions of immune cell composition in the
+tumour microenvironment from RNA-sequencing data. Predictions are made
+using the `inmmunedeconv`
 [package](https://github.com/icbi-lab/immunedeconv), which include six
 prediction algorithms: QUANTISEQ, TIMER, MCP_COUNTER, XCELL, EPIC and
 CIBERSORT.
@@ -464,14 +491,15 @@ CIBERSORT.
 
 ![](www/24_ic_within_samples.png)
 
--   **Immune Score**: The last two plots contain immunophenogram (IPG)
-    and immunophenoscores (IPS) for each sample and each group of study.
-    They give an overall picture of the state of MHC molecules (MHC),
-    Immunomodulators (CP), Effector cells (EC) and Suppressor cells (SC)
-    in each sample, making possible the comparison between samples. For
-    further interpretation please visit [The Cancer Immunome
-    Atlas](https://tcia.at/tools/toolsMain).
+-   **Immune Score**: The state of Effector cells (EC), Suppressor cells
+    (SC), Immunomodulators (CP) and MHC molecules (MHC) are shown. All
+    this values are added up to calculate an immunophenoscore (IPS). The
+    table show the corresponding values for each sample. Finally, there
+    is a button to generate a pdf report that will contain an
+    immunophenogram (IPG) per each sample per page. Here we show an
+    example of one of the samples. For further interpretation please
+    visit [The Cancer Immunome Atlas](https://tcia.at/tools/toolsMain).
 
-![](www/25_ipg.png) ![](www/26_immunophenoscore.png)
+![](www/26_immunophenoscore.png)
 
-![](www/27_ips_table.png)
+![](www/27_ips_table.png) ![](www/25_ipg.png)
