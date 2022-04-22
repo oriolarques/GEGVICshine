@@ -1182,7 +1182,8 @@ server <- function(input, output, session) {
             
             s_plot_comp_celltypes(df = ic.pred,
                                   metadata = metadata(),
-                                  response = input$response)
+                                  response = input$response,
+                                  col.names = input$mut_colnames)
             
           })
           
