@@ -157,8 +157,7 @@ There is an additional button to download sample input data. These can be used t
 ##### 2. Inputs
 Here the user need to upload the necessary input files: 
 
-![](www/02_2_GEGVICshine_inputs_subtab_1.png)
-![](www/02_2_GEGVICshine_inputs_subtab_2.png)
+![](www/02_2_GEGVICshine_inputs_subtab.png)
 
 **All files must be .csv files (comma separated values) except for the gene sets that must be in the form of a .gmt file.** The format of each specific file should be as follows:
 

@@ -181,8 +181,7 @@ be used to reproduce the results from this manual.
 
 Here the user need to upload the necessary input files:
 
-![](www/02_2_GEGVICshine_inputs_subtab_1.png)
-![](www/02_2_GEGVICshine_inputs_subtab_2.png)
+![](www/02_2_GEGVICshine_inputs_subtab.png)
 
 **All files must be .csv files (comma separated values) except for the
 gene sets that must be in the form of a .gmt file.** The format of each
