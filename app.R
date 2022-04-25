@@ -225,7 +225,7 @@ ui <- navbarPage(
                                    width = NULL),
                     # mut_colnames
                     checkboxInput(inputId = 'mut_colnames', 
-                                  label = 'Show column names in Oncoplot and Mutational Signature analyses (GV)', 
+                                  label = 'Show column names in Oncoplot, Mutational Signature analyses and Immune Cell Composition (GV, IC)', 
                                   value = TRUE, 
                                   width = NULL),
                     # ic_samples_points
