@@ -892,7 +892,7 @@ server <- function(input, output, session) {
                                gmt = gmt(),
                                gsea_pvalue = input$gsea_pvalue)
                 ## In case no p-value is too restrictive
-                if (names(gsea) == 'no_genesets') {
+                if (names(gsea)[1] == 'no_genesets') {
                   output[[paste0(n, '_no_gsea')]] <- renderText({
                     
                     '<b> No gene sets are enriched under specific pvalueCutoff!! </b>'

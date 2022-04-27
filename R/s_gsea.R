@@ -15,9 +15,6 @@ s_gsea <- function(annot_res,
     }
         
     # 1. Obtain geneLists
-    ## Create a list to store as many geneList as conditions
-    geneLists <- list()
-    
     ## Create two temporal objects
     temp_df <- NULL
     temp_gs <- NULL
