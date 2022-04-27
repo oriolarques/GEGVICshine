@@ -104,7 +104,8 @@ if(!require(BSgenome.Hsapiens.UCSC.hg19)) BiocManager::install("BSgenome.Hsapien
 if(!require(BSgenome.Hsapiens.UCSC.hg38)) BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
 if(!require(BSgenome.Mmusculus.UCSC.mm10)) BiocManager::install("BSgenome.Mmusculus.UCSC.mm10")
 if(!require(BSgenome.Mmusculus.UCSC.mm39)) BiocManager::install("BSgenome.Mmusculus.UCSC.mm39")
-
+if(!require(DO.db)) BiocManager::install("DO.db")
+if(!require(GO.db)) BiocManager::install("GO.db")
 
 # Github packages
 remotes::install_github("icbi-lab/immunedeconv")
@@ -296,8 +297,8 @@ a hint as to what can be entered.
     *Mus musculus* samples..
 
 -   **Fold Change (GE)**: An integer to define the fold change value to
-    consider that a gene is differentially expressed. Default value
-    is 2.
+    consider that a gene is differentially expressed. Default value is
+    2.
 
 -   **Adjusted p-value for gene expression data (GE)**: Numeric value to
     define the maximum adjusted p-value to consider that a gene is
