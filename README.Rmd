@@ -43,7 +43,7 @@ docker pull oarques/gegvicshine
 - In the terminal run
 
 ```
-docker run -p 80:80 gegvicshine
+docker run -p 80:80 oarques/gegvicshine
 ````
 
 - Go to the internet browser (Chrome/Firefox) and type 

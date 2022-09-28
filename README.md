@@ -9,7 +9,7 @@
 A shiny app created with the intention to provide a user-friendly access
 to the `GEGVIC` [package](https://github.com/oriolarques/GEGVIC).
 Together they create a workflow to analyse **G**ene **E**xpression,
-**G**enetic **V**ariations and **I**mmune cell **C**omposition of tumour
+**G**enomic **V**ariations and **I**mmune cell **C**omposition of tumour
 samples using Next Generation Sequencing data.
 
 ## Installation
@@ -44,7 +44,7 @@ To use GEGVICshine locally there are two options.
 
 <!-- -->
 
-    docker run -p 80:80 gegvicshine
+    docker run -p 80:80 oarques/gegvicshine
 
 -   Go to the internet browser (Chrome/Firefox) and type
 
