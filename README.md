@@ -138,7 +138,7 @@ and to visualise the results:
 
 -   Parameters
 -   GE_module (Gene Expression module)
--   GV_module (Genetic Variations module)
+-   GV_module (Genomic Variations module)
 -   IC_module (Immune cell Composition module)
 -   Getting started
 -   About
@@ -163,7 +163,7 @@ next sub-tab.
 
 In all of the cases, for each parameter has a tag (between brackets)
 that indicates in which modules it is necessary. The codes are: **GE**
-for the GE_module (Gene Expression), **GV** for the GV_module (Genetic
+for the GE_module (Gene Expression), **GV** for the GV_module (Genomic
 Variations) or **IC** for the IC_module (Immune cell Composition).
 
 The parameters sub-tabs are:
@@ -197,7 +197,7 @@ specific file should be as follows:
 
 ![](www/input_counts.png)
 
--   **Genetic variations**: Table containing short variant calls.
+-   **Genomic variations**: Table containing short variant calls.
     Necessary columns MUST have the following names (following the MAF
     format: <https://docs.gdc.cancer.gov/Data/File_Formats/MAF>
     \_Format/):
@@ -234,7 +234,7 @@ specific file should be as follows:
     the samples to create groups such as response to a therapy. The
     first column MUST be named **Samples** and contain the same
     nomenclature for each sample as in the RNA-sequencing raw counts and
-    Genetic variations data tables.
+    Genomic variations data tables.
 
 ![](www/input_metadata.png)
 
@@ -352,6 +352,33 @@ the processes that are being executed in the server.
 
 ![](www/04_GEGVICshine_execute_subtab.png) ![](www/05_progress_bar.png)
 
+##### Note: Vignette reproducibility
+
+*The following list contain specific values to reproduce this vignette
+results. Those parameters not mentioned should be left as default.*
+
+    - RNA-seq raw counts, Metadata, Genomic Variations and Gene sets: files from [GEGVIC page](https://github.com/oriolarques/GEGVIC/tree/main/inst/extdata)
+
+    - Select response variables: MSI_status
+
+    - Genes ID: ensembl_gene_id
+
+    - Design formula: MSI_status
+
+    - Reference level: MSS
+
+    - Colors: orange, black
+
+    - BiomaRt database: ensembl_biomart_GRCh38_p13
+
+    - Cancer types: coad
+
+    - Select means comparison method: wilcox.test
+
+    - Genomic build: BSgenome.Hsapiens.UCSC.hg38
+
+    - Select mutational signatures matrix: COSMIC_v2_SBS_GRCh38
+
 #### 2.3. GE_module
 
 This section contains the results of the differential gene expression
@@ -420,7 +447,7 @@ and figures.*
 
 #### 2.4. GV_module
 
-This section contains the results of the the analysis of genetic
+This section contains the results of the the analysis of genomic
 variations in the samples. Mutation summaries are calculated using the
 `maftools`
 [package](https://bioconductor.org/packages/release/bioc/html/maftools.html),

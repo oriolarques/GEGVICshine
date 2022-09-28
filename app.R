@@ -70,7 +70,7 @@ ui <- navbarPage(
                           label = 'Analyse Gene Expression (GE_module)', 
                           value = FALSE),
             checkboxInput(inputId = 'gv_module', 
-                          label = 'Analyse Genetic Variatons (GV_module)', 
+                          label = 'Analyse Genomic Variatons (GV_module)', 
                           value = FALSE),
             checkboxInput(inputId = 'ic_module', 
                           label = 'Analyse Immune Composition (IC_module)', 
@@ -107,9 +107,9 @@ ui <- navbarPage(
               selectInput(inputId = 'response',
                           label = 'Select response variable (GE, GV, IC)',
                           choices = ""),
-            # Input: Genetic variations
+            # Input: Genomic variations
             fileInput(inputId = "muts", 
-                      label = 'Genetic Variations (GV)',
+                      label = 'Genomic Variations (GV)',
                       accept = c('.csv')),
             # Input: gmt
             fileInput(inputId = "gmt", 
@@ -211,7 +211,12 @@ ui <- navbarPage(
                              choices = list('Gene set collection' = c('gsva',
                                                                       'ssgsea',
                                                                       'zscore'))),
-                 
+                 # gsva_method
+                 selectInput(inputId = 'gsva_kernel',
+                             label = 'GSVA kernel (GE)',
+                             choices = list('Kernel' = c('Poisson',
+                                                         'Gaussian',
+                                                         'none'))),
                  tags$strong('Advanced plot options'),
                      # gsva_rownames
                      checkboxInput(inputId = 'gsva_rownames', 
@@ -649,7 +654,7 @@ server <- function(input, output, session) {
             
         })
         
-        # Read genetic variations input ---------------------------------------
+        # Read genomic variations input ---------------------------------------
         muts <- reactive({
           # Ensure the file is uploaded and available
           req(input$muts)
@@ -986,6 +991,7 @@ server <- function(input, output, session) {
                                biomart = biomart(),
                                gsva_gmt = gsva_gmt(),
                                method = input$gsva_method,
+                               kcdf = input$gsva_kernel,
                                colors = colors(),
                                row.names = input$gsva_rownames,
                                col.names = input$gsva_colnames)

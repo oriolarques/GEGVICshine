@@ -6,6 +6,7 @@ s_single <- function(counts,
                      biomart,
                      gsva_gmt,
                      method,
+                     kcdf,
                      colors = c('black', 'orange'),
                      row.names = TRUE,
                      col.names = TRUE) {
@@ -100,7 +101,8 @@ s_single <- function(counts,
     # Calculate GSVA/ssGSEA
     gsva_temp <- GSVA::gsva(expr = as.matrix(exprs.mat.annot),
                             gset.idx.list = gmt,
-                            method = method)
+                            method = method,
+                            kcdf = kcdf)
     
     # Plot Heatmap
     ## Define response level group colors in a list

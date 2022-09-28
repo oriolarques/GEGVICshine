@@ -127,7 +127,7 @@ The interface of the app is quite simple, with a top panel containing the differ
 
 - Parameters
 - GE_module (Gene Expression module)
-- GV_module (Genetic Variations module)
+- GV_module (Genomic Variations module)
 - IC_module (Immune cell Composition module)
 - Getting started
 - About
@@ -144,7 +144,7 @@ This tab is where you can find the present manual page. And information about th
 
 Parameters is the default tab that appears when opening the app and is the section where the user can upload the input files and define the rest of the parameters needed to perform all the analyses. In total there are four sub-tabs in this section and the user must fill in the indicated parameters in each case and click the button to access the next sub-tab. 
 
-In all of the cases, for each parameter has a tag (between brackets) that indicates in which modules it is necessary. The codes are: **GE** for the GE_module (Gene Expression), **GV** for the GV_module (Genetic Variations) or **IC** for the IC_module (Immune cell Composition).
+In all of the cases, for each parameter has a tag (between brackets) that indicates in which modules it is necessary. The codes are: **GE** for the GE_module (Gene Expression), **GV** for the GV_module (Genomic Variations) or **IC** for the IC_module (Immune cell Composition).
 
 The parameters sub-tabs are:
 
@@ -166,7 +166,7 @@ Here the user need to upload the necessary input files:
 
 ![](www/input_counts.png)
 
-- **Genetic variations**: Table containing short variant calls. Necessary columns MUST have the following names (following the MAF format: https://docs.gdc.cancer.gov/Data/File_Formats/MAF _Format/):
+- **Genomic variations**: Table containing short variant calls. Necessary columns MUST have the following names (following the MAF format: https://docs.gdc.cancer.gov/Data/File_Formats/MAF _Format/):
     
     – Hugo_Symbol: Gene symbol from HGNC.
     
@@ -189,7 +189,7 @@ Here the user need to upload the necessary input files:
 
 ![](www/input_muts.png)
 
-- **Samples metadata**: Table that contains additional information to the samples to create groups such as response to a therapy. The first column MUST be named **Samples** and contain the same nomenclature for each sample as in the RNA-sequencing raw counts and Genetic variations data tables.
+- **Samples metadata**: Table that contains additional information to the samples to create groups such as response to a therapy. The first column MUST be named **Samples** and contain the same nomenclature for each sample as in the RNA-sequencing raw counts and Genomic variations data tables.
 
 ![](www/input_metadata.png)
 
@@ -249,6 +249,35 @@ Once all the desired modules have been selected, the input files have been uploa
 ![](www/04_GEGVICshine_execute_subtab.png)
 ![](www/05_progress_bar.png)
 
+##### Note: Vignette reproducibility
+
+*The following list contain specific values to reproduce this vignette results. Those parameters not mentioned should be left as default.* 
+
+```
+- RNA-seq raw counts, Metadata, Genomic Variations and Gene sets: files from [GEGVIC page](https://github.com/oriolarques/GEGVIC/tree/main/inst/extdata)
+
+- Select response variables: MSI_status
+
+- Genes ID: ensembl_gene_id
+
+- Design formula: MSI_status
+
+- Reference level: MSS
+
+- Colors: orange, black
+
+- BiomaRt database: ensembl_biomart_GRCh38_p13
+
+- Cancer types: coad
+
+- Select means comparison method: wilcox.test
+
+- Genomic build: BSgenome.Hsapiens.UCSC.hg38
+
+- Select mutational signatures matrix: COSMIC_v2_SBS_GRCh38
+
+```
+
 #### 2.3. GE_module
 
 This section contains the results of the differential gene expression analysis, which is calculated using the `DESeq2` [package](https://bioconductor.org/packages/release/bioc/html/DESeq2.html). For GSEA, `clusterProfiler` [package](https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html) is used for the analysis and `GSEAmining` [package](https://bioconductor.org/packages/release/bioc/html/GSEAmining.html) and `GSVA` [package](https://www.bioconductor.org/packages/release/bioc/html/GSVA.html) are used for results summary and visualization.
@@ -284,7 +313,7 @@ The next section, entitled *Differentially Expressed Genes*, contains the rest o
 
 #### 2.4. GV_module
 
-This section contains the results of the the analysis of genetic variations in the samples. Mutation summaries are calculated using the `maftools` [package](https://bioconductor.org/packages/release/bioc/html/maftools.html), whereas mutational signatures are predicted using the `deconstructSigs` [package](https://github.com/raerose01/deconstructSigs).
+This section contains the results of the the analysis of genomic variations in the samples. Mutation summaries are calculated using the `maftools` [package](https://bioconductor.org/packages/release/bioc/html/maftools.html), whereas mutational signatures are predicted using the `deconstructSigs` [package](https://github.com/raerose01/deconstructSigs).
 
 - **Mutations summary**: The first figure shows a general summary of the mutations, including the type of variations, the proportion of base changes or the number of mutations per sample.
 
