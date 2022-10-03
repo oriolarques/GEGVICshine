@@ -214,8 +214,8 @@ ui <- navbarPage(
                  # gsva_method
                  selectInput(inputId = 'gsva_kernel',
                              label = 'GSVA kernel (GE)',
-                             choices = list('Kernel' = c('Poisson',
-                                                         'Gaussian',
+                             choices = list('Kernel' = c('Gaussian',
+                                                         'Poisson',
                                                          'none'))),
                  tags$strong('Advanced plot options'),
                      # gsva_rownames

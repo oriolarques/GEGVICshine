@@ -124,6 +124,8 @@ This section contains several parameters that need to be completed either as a d
 
 - **GSVA method (GE)**: List of the methods available for GSVA. Either *gsva*, *ssgsea* or *zscore*.
 
+- **GSVA kernel (GE)**: List of the kernel methods available for GSVA. Either *Gaussian*, *Poisson* or *none*.
+
 - **Advanced plot options**: Check boxes to decided whether column- or row-names or points should be added in specific plots. 
 
 - **Cancer types: TCGA Study Abbreviations (IC)**: List of TCGA study abbreviations. For more information visit the following [link](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations).

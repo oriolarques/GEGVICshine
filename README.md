@@ -315,6 +315,9 @@ a hint as to what can be entered.
 -   **GSVA method (GE)**: List of the methods available for GSVA. Either
     *gsva*, *ssgsea* or *zscore*.
 
+-   **GSVA kernel (GE)**: List of the kernel methods available for GSVA.
+    Either *Gaussian*, *Poisson* or *none*.
+
 -   **Advanced plot options**: Check boxes to decided whether column- or
     row-names or points should be added in specific plots.
 
