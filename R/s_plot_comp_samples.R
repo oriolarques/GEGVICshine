@@ -89,8 +89,10 @@ s_plot_comp_samples <- function(df,
             axis.title.y = element_blank(),
             axis.text.x = element_text(angle = 45, hjust = 1),
             legend.position = 'bottom',
+            legend.title = element_text(face='bold', size =12),
+            legend.text = element_text(size =12),
             strip.background = element_rect(
-                color="black", fill="black", size=1.5, linetype="solid"),
+                color="black", fill="black", linewidth=1.5, linetype="solid"),
             strip.text = element_text(color = 'white')
         ) +
         
@@ -112,6 +114,8 @@ s_plot_comp_samples <- function(df,
     
     # Add points to the plot
     if(points == TRUE){
+        library('ggplot2') # load to avoid Error in `ggpubr::stat_compare_means()`  could not find function "after_stat"
+        
         p <- p +
             geom_point(alpha = 0.5, position = position_jitter(0.2))
     }

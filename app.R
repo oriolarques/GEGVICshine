@@ -327,7 +327,7 @@ ui <- navbarPage(
               tags$h1('PCA'),
               #Plot PCA
               plotOutput(outputId = 'pca', 
-                         width = '80%')
+                         width = '800px', height = '600px')
             ),
             
             # Dynamic tab to show per comparison a tab with:
@@ -343,7 +343,7 @@ ui <- navbarPage(
               tags$h1('GSVA'),
               ## Heatmap
               tags$h4('Heatmap'),
-              plotOutput(outputId = 'gsva',height = '1000px'),
+              plotOutput(outputId = 'gsva',height = '1000px', width = '1000px'),
               ## Table with the results
               tags$h4('Table of Gene Sets Enrichment'),
               dataTableOutput(outputId = 'gsva_table'),
@@ -362,7 +362,7 @@ ui <- navbarPage(
                  wellPanel(
                    tags$h1('Mutations Summary'),
                    plotOutput(outputId = 'mut_sum', 
-                              width = '75%',
+                              width = '1000px', #'75%',
                               height = '600px')
                    
                  ),
@@ -370,14 +370,14 @@ ui <- navbarPage(
                  wellPanel(
                    tags$h1('Oncoplot'),
                    plotOutput(outputId = 'oncoplot',
-                              width = '75%',
+                              width = '1000px', #'75%',
                               height = '600px')
                  ),
                  
                  wellPanel(
                    tags$h1('Mutational Load'),
                    plotOutput(outputId = 'mut_load', 
-                              width = '75%',
+                              width = '800px', #'75%',
                               height = '600px'),
                    ## Table with the results
                    tags$h4('Mutational Load Table'),
@@ -389,10 +389,10 @@ ui <- navbarPage(
                  wellPanel(
                    tags$h1('Mutational Signatures'),
                    plotOutput(outputId = 'mut_sigs_bar', 
-                              width = '80%',
+                              width = '1000px', #'80%',
                               height = '700px'),
                    plotOutput(outputId = 'mut_sigs_heat', 
-                              width = '80%',
+                              width = '1000px', #'80%',
                               height = '700px'),
                    ## Table with the results
                    tags$h4('Results Table'),
@@ -827,7 +827,7 @@ server <- function(input, output, session) {
                                  tags$h4('Volcano Plot'),
                                  #Plot Volcano
                                  plotOutput(outputId = paste0(n, '_volcano'), 
-                                            width = '75%',
+                                            width = '800px',
                                             height = '600px')
                                  ),
                                # 3. GSEA
@@ -843,22 +843,23 @@ server <- function(input, output, session) {
                                  # Plot bubble graph
                                  tags$h4('Bubble Plot'),
                                  plotOutput(outputId = paste0(n, '_bubble_plot'),
-                                            width = '75%',
+                                            width = '1200px',
                                             height = '800px'),
                                  # Plot gsea cluster
                                  tags$h4('Gene Set Clusters'),
                                  plotOutput(outputId = paste0(n, '_gsea_clust'), 
-                                            width = '75%'#, height = '800px'
+                                            width = '800px', # 75%
+                                            height = '600px'
                                             ),
                                  # Plot gsea wordclouds
                                  tags$h4('Gene Set Enriched Terms'),
                                  plotOutput(outputId = paste0(n, '_gsea_word'), 
-                                            width = '75%',
+                                            width = '1000px', # 75%
                                             height = '800px'),
                                  # Plot gsea leading edge
                                  tags$h4('Gene Set Core Enrichment (Leading Edge)'),
                                  plotOutput(outputId = paste0(n, '_gsea_core'),
-                                            width = '75%',
+                                            width = '1000px', # 75%
                                             height = '800px')
                                  )),
                       select = TRUE
@@ -953,13 +954,14 @@ server <- function(input, output, session) {
                       scale_color_gradient(low = "#FF9900", high = "#FF3300")+
                       labs(size='% of genes in\n leading edge', colour = 'p.adjust')+
                       theme_bw()+
-                      theme(panel.grid = element_blank(),
-                            axis.text = element_text(size=12, face = "bold"),
+                      theme(plot.title = element_text(hjust = 0.5, size = 15),
+                            panel.grid = element_blank(),
                             axis.title.y = element_blank(),
                             axis.title.x = element_text(size=15),
-                            axis.text.x = element_text(size=10),
-                            legend.title = element_text(face='bold', size =8),
-                            legend.text = element_text(size =7))  
+                            axis.text.x = element_text(size=15, face = "bold"),
+                            axis.text.y = element_text(size=12, face = "bold"),
+                            legend.title = element_text(face='bold', size =12),
+                            legend.text = element_text(size =12))  
                   })
                   # Output: GSEA cluster
                   output[[paste0(n, '_gsea_clust')]] <- renderPlot({

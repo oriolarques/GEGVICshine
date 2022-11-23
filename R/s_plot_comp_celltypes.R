@@ -89,8 +89,10 @@ s_plot_comp_celltypes <- function(df,
             axis.title.x = element_blank(),
             axis.title.y = element_blank(),
             axis.text.x = element_text(size = 8, angle = 45, hjust = 1, face = 'bold'),
+            legend.title = element_text(face='bold', size =12),
+            legend.text = element_text(size =12),
             strip.background = element_rect(
-                color="black", fill="black", size=1.5, linetype="solid"),
+                color="black", fill="black", linewidth=1.5, linetype="solid"),
             strip.text = element_text(color = 'white')
         ) +
         

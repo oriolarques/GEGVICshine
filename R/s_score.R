@@ -342,7 +342,7 @@ s_score <- function(tpm,
               axis.text.x = element_text(angle = 45, hjust = 1),
               legend.position = 'bottom',
               strip.background = element_rect(
-                  color="black", fill="black", size=1.5, linetype="solid"),
+                  color="black", fill="black", linewidth=1.5, linetype="solid"),
               strip.text = element_text(color = 'white')) +
         facet_wrap(~ Cell_type,
                    scales = 'free_y',
@@ -375,6 +375,8 @@ s_score <- function(tpm,
               legend.position = 'bottom'
         )
     if(is.null(compare) == FALSE){
+        library('ggplot2') # load to avoid Error in `ggpubr::stat_compare_means()`  could not find function "after_stat"
+        
         subplots <- subplots +
             ggpubr::stat_compare_means(method = compare,
                                        label = p_label,

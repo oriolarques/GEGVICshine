@@ -31,22 +31,22 @@ To use GEGVICshine locally there are two options.
 
 #### Using Docker (Recommended)
 
--   Install Docker desktop (<https://www.docker.com/get-started/>)
+- Install Docker desktop (<https://www.docker.com/get-started/>)
 
--   Download the GEGVICshine docker image copying the following command
-    in a terminal (<https://hub.docker.com/r/oarques/gegvicshine>).
+- Download the GEGVICshine docker image copying the following command in
+  a terminal (<https://hub.docker.com/r/oarques/gegvicshine>).
 
 <!-- -->
 
     docker pull oarques/gegvicshine
 
--   In the terminal run
+- In the terminal run
 
 <!-- -->
 
     docker run -p 80:80 oarques/gegvicshine
 
--   Go to the internet browser (Chrome/Firefox) and type
+- Go to the internet browser (Chrome/Firefox) and type
 
 <!-- -->
 
@@ -54,19 +54,19 @@ To use GEGVICshine locally there are two options.
 
 #### Using Rstudio
 
--   Run the following command in the terminal to get the GEGVICshine
-    GitHub repository:
+- Run the following command in the terminal to get the GEGVICshine
+  GitHub repository:
 
 <!-- -->
 
     git clone https://github.com/oriolarques/GEGVICshine
 
--   Alternatively, manually download the repository (**app.R** file,
-    **R/** folder and **wwww/** folder).
+- Alternatively, manually download the repository (**app.R** file,
+  **R/** folder and **wwww/** folder).
 
--   In Rstudio, since the `GEGVIC` package requires many dependencies,
-    it is recommended to execute the following code before the first
-    usage to prepare the environment correctly.
+- In Rstudio, since the `GEGVIC` package requires many dependencies, it
+  is recommended to execute the following code before the first usage to
+  prepare the environment correctly.
 
 ``` r
 # CRAN packages 
@@ -113,7 +113,7 @@ devtools::install_github('raerose01/deconstructSigs')
 devtools::install_github("oriolarques/GEGVIC")
 ```
 
--   Then run the `GEGVICshine` app using the following code:
+- Then run the `GEGVICshine` app using the following code:
 
 <!-- -->
 
@@ -136,12 +136,12 @@ The interface of the app is quite simple, with a top panel containing
 the different tabs that the user can use to set the analysis parameters
 and to visualise the results:
 
--   Parameters
--   GE_module (Gene Expression module)
--   GV_module (Genomic Variations module)
--   IC_module (Immune cell Composition module)
--   Getting started
--   About
+- Parameters
+- GE_module (Gene Expression module)
+- GV_module (Genomic Variations module)
+- IC_module (Immune cell Composition module)
+- Getting started
+- About
 
 ![](www/01_GEGVICshine_tabs.png)
 
@@ -188,73 +188,71 @@ Here the user need to upload the necessary input files:
 gene sets that must be in the form of a .gmt file.** The format of each
 specific file should be as follows:
 
--   **RNA-sequencing raw counts**: Table containing raw gene counts as
-    rows and samples as columns. The first column must contain gene
-    identifiers that can be either NCBI ID, ENSEMBL gene ID or HGNC ID
-    and its column name MUST be adequately named as either:
-    **entrezgene_id**, **ensembl_gene_id** or **hgnc_symbol**
-    respectively.
+- **RNA-sequencing raw counts**: Table containing raw gene counts as
+  rows and samples as columns. The first column must contain gene
+  identifiers that can be either NCBI ID, ENSEMBL gene ID or HGNC ID and
+  its column name MUST be adequately named as either: **entrezgene_id**,
+  **ensembl_gene_id** or **hgnc_symbol** respectively.
 
 ![](www/input_counts.png)
 
--   **Genomic variations**: Table containing short variant calls.
-    Necessary columns MUST have the following names (following the MAF
-    format: <https://docs.gdc.cancer.gov/Data/File_Formats/MAF>
-    \_Format/):
+- **Genomic variations**: Table containing short variant calls.
+  Necessary columns MUST have the following names (following the MAF
+  format: <https://docs.gdc.cancer.gov/Data/File_Formats/MAF>
+  \_Format/):
 
-    – Hugo_Symbol: Gene symbol from HGNC.
+  – Hugo_Symbol: Gene symbol from HGNC.
 
-    – Chromosome: Affected chromosome.
+  – Chromosome: Affected chromosome.
 
-    – Start_Position: Mutation start coordinate.
+  – Start_Position: Mutation start coordinate.
 
-    – End_Position: Mutation end coordinate.
+  – End_Position: Mutation end coordinate.
 
-    – Reference_Allele: The plus strand reference allele at this
-    position. Includes the deleted sequence for a deletion or “-” for an
-    insertion.
+  – Reference_Allele: The plus strand reference allele at this position.
+  Includes the deleted sequence for a deletion or “-” for an insertion.
 
-    – Tumor_Seq_Allele2: Tumor sequencing discovery allele.
+  – Tumor_Seq_Allele2: Tumor sequencing discovery allele.
 
-    – Variant_Classification: Translational effect of variant allele.
-    Can be one of the following: Frame_Shift_Del, Frame_Shift_Ins,
-    In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation,
-    Silent, Splice_Site, Translation_Start_Site, Nonstop_Mutation, RNA,
-    Targeted_Region.
+  – Variant_Classification: Translational effect of variant allele. Can
+  be one of the following: Frame_Shift_Del, Frame_Shift_Ins,
+  In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation,
+  Silent, Splice_Site, Translation_Start_Site, Nonstop_Mutation, RNA,
+  Targeted_Region.
 
-    – Variant_type: Type of mutation. Can be: ‘SNP’ (Single nucleotide
-    polymorphism), ‘DNP’ (Double nucleotide polymorphism), ‘INS’
-    (Insertion), ‘DEL’ (Deletion).
+  – Variant_type: Type of mutation. Can be: ‘SNP’ (Single nucleotide
+  polymorphism), ‘DNP’ (Double nucleotide polymorphism), ‘INS’
+  (Insertion), ‘DEL’ (Deletion).
 
-    – Tumor_Sample_Barcode: Sample name.
+  – Tumor_Sample_Barcode: Sample name.
 
 ![](www/input_muts.png)
 
--   **Samples metadata**: Table that contains additional information to
-    the samples to create groups such as response to a therapy. The
-    first column MUST be named **Samples** and contain the same
-    nomenclature for each sample as in the RNA-sequencing raw counts and
-    Genomic variations data tables.
+- **Samples metadata**: Table that contains additional information to
+  the samples to create groups such as response to a therapy. The first
+  column MUST be named **Samples** and contain the same nomenclature for
+  each sample as in the RNA-sequencing raw counts and Genomic variations
+  data tables.
 
 ![](www/input_metadata.png)
 
--   **Select the response variable**: Once the metadata file is
-    uploaded, the user must select which variable will be used as
-    grouping variable in all of the different analyses.
+- **Select the response variable**: Once the metadata file is uploaded,
+  the user must select which variable will be used as grouping variable
+  in all of the different analyses.
 
--   **Gene set collections to be analysed by GSEA in a form of a .gmt
-    file**: Those files can be downloaded from the Molecular Signatures
-    Database, [MSigDB](http://www.gsea-msigdb.org/gsea/downloads.jsp) or
-    be customly created following the corresponding \[guidelines\]
-    (<https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats>).
-    In the case of working with mouse data gmt files can be found
-    [here](https://bioinf.wehi.edu.au/MSigDB/).
+- **Gene set collections to be analysed by GSEA in a form of a .gmt
+  file**: Those files can be downloaded from the Molecular Signatures
+  Database, [MSigDB](http://www.gsea-msigdb.org/gsea/downloads.jsp) or
+  be customly created following the corresponding \[guidelines\]
+  (<https://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats>).
+  In the case of working with mouse data gmt files can be found
+  [here](https://bioinf.wehi.edu.au/MSigDB/).
 
--   *To use the CIBERSORT algorithm, the user need to register on the
-    CIBERSORT web page (<https://cibersort.stanford.edu>), obtain a
-    license and download the source code in form of two files
-    CIBERSORT.R and LM22.txt. Then both files need to be uploaded in the
-    corresponding space.*
+- *To use the CIBERSORT algorithm, the user need to register on the
+  CIBERSORT web page (<https://cibersort.stanford.edu>), obtain a
+  license and download the source code in form of two files CIBERSORT.R
+  and LM22.txt. Then both files need to be uploaded in the corresponding
+  space.*
 
 ##### 3. Parameters:
 
@@ -271,79 +269,77 @@ a hint as to what can be entered.
 
 ![](www/03_GEGVICshine_parameters_subtab_3.png)
 
--   **Genes ID (GE, IC)**: Name of the column that contains gene
-    identifiers (entrezgene_id, ensembl_gene_id or hgnc_symbol).
+- **Genes ID (GE, IC)**: Name of the column that contains gene
+  identifiers (entrezgene_id, ensembl_gene_id or hgnc_symbol).
 
--   **Design formula (GE)**: A formula that expresses how the counts for
-    each gene depend on the variables in the metadata (for example
-    Cell + Treatment + Cell:Treatment)
+- **Design formula (GE)**: A formula that expresses how the counts for
+  each gene depend on the variables in the metadata (for example Cell +
+  Treatment + Cell:Treatment)
 
--   **Reference level (GE)**: Name of the grouping variable in the
-    metadata that will be used as the reference to be compared against.
+- **Reference level (GE)**: Name of the grouping variable in the
+  metadata that will be used as the reference to be compared against.
 
--   **Colors**: Indicate the color for each sample group separated by
-    commas (GE, GV, IC).
+- **Colors**: Indicate the color for each sample group separated by
+  commas (GE, GV, IC).
 
--   **Shrinkage method (GE)**: Name of the shrinkage method to apply
-    within the DESeq2 algorithm. It can be either **apeglm**, **ashr**,
-    **normal** or **none**. Default value is *apeglm* and sse *none* to
-    skip shrinkage.
+- **Shrinkage method (GE)**: Name of the shrinkage method to apply
+  within the DESeq2 algorithm. It can be either **apeglm**, **ashr**,
+  **normal** or **none**. Default value is *apeglm* and sse *none* to
+  skip shrinkage.
 
--   **BiomaRt database (GE, IC)**: Data frame containing a biomaRt query
-    with the following attributes: ensembl_gene_id, hgnc_symbol,
-    entrezgene_id, transcript_length,refseq_mrna. Options are
-    ensembl_biomartGRCh37 and ensembl_biomartGRCh38_p13 for *Homo
-    sapiens* or ensembl_biomartGRCm38_p6 and ensembl_biomartGRCm39 for
-    *Mus musculus* samples..
+- **BiomaRt database (GE, IC)**: Data frame containing a biomaRt query
+  with the following attributes: ensembl_gene_id, hgnc_symbol,
+  entrezgene_id, transcript_length,refseq_mrna. Options are
+  ensembl_biomartGRCh37 and ensembl_biomartGRCh38_p13 for *Homo sapiens*
+  or ensembl_biomartGRCm38_p6 and ensembl_biomartGRCm39 for *Mus
+  musculus* samples..
 
--   **Fold Change (GE)**: An integer to define the fold change value to
-    consider that a gene is differentially expressed. Default value is
-    2.
+- **Fold Change (GE)**: An integer to define the fold change value to
+  consider that a gene is differentially expressed. Default value is 2.
 
--   **Adjusted p-value for gene expression data (GE)**: Numeric value to
-    define the maximum adjusted p-value to consider that a gene is
-    differentially expressed.
+- **Adjusted p-value for gene expression data (GE)**: Numeric value to
+  define the maximum adjusted p-value to consider that a gene is
+  differentially expressed.
 
--   **Adjusted p-value for GSEA (GE)**: Numeric value to define the
-    adjusted pvalue cutoff in GSEA. Set to 0.2 by default.
+- **Adjusted p-value for GSEA (GE)**: Numeric value to define the
+  adjusted pvalue cutoff in GSEA. Set to 0.2 by default.
 
--   **Select genesets for GSVA (GE)**: List of options to choose whether
-    the gene sets that will be used for GSVA are those from the Hallmark
-    [collection](http://www.gsea-msigdb.org/gsea/msigdb/index.jsp) or
-    the same that where indicated for GSEA.
+- **Select genesets for GSVA (GE)**: List of options to choose whether
+  the gene sets that will be used for GSVA are those from the Hallmark
+  [collection](http://www.gsea-msigdb.org/gsea/msigdb/index.jsp) or the
+  same that where indicated for GSEA.
 
--   **GSVA method (GE)**: List of the methods available for GSVA. Either
-    *gsva*, *ssgsea* or *zscore*.
+- **GSVA method (GE)**: List of the methods available for GSVA. Either
+  *gsva*, *ssgsea* or *zscore*.
 
--   **GSVA kernel (GE)**: List of the kernel methods available for GSVA.
-    Either *Gaussian*, *Poisson* or *none*.
+- **GSVA kernel (GE)**: List of the kernel methods available for GSVA.
+  Either *Gaussian*, *Poisson* or *none*.
 
--   **Advanced plot options**: Check boxes to decided whether column- or
-    row-names or points should be added in specific plots.
+- **Advanced plot options**: Check boxes to decided whether column- or
+  row-names or points should be added in specific plots.
 
--   **Cancer types: TCGA Study Abbreviations (IC)**: List of TCGA study
-    abbreviations. For more information visit the following
-    [link](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations).
+- **Cancer types: TCGA Study Abbreviations (IC)**: List of TCGA study
+  abbreviations. For more information visit the following
+  [link](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/tcga-study-abbreviations).
 
--   **Select means comparison method (GV, IC)**: Methods used for
-    comparing means between groups. Options are **t.test**(parametric)
-    and **wilcox.test** (non-parametric) for two groups or **anova**
-    (parametric) and **kruskal.test** (non-parametric) for more groups.
+- **Select means comparison method (GV, IC)**: Methods used for
+  comparing means between groups. Options are **t.test**(parametric) and
+  **wilcox.test** (non-parametric) for two groups or **anova**
+  (parametric) and **kruskal.test** (non-parametric) for more groups.
 
--   **Number of genes for oncoplot (GV)**: Numeric value indicating the
-    number of genes that will appear in the oncoplot.
+- **Number of genes for oncoplot (GV)**: Numeric value indicating the
+  number of genes that will appear in the oncoplot.
 
--   **Select genomic build (GV)**: Version of the genome to work with.
-    Options are BSgenome.Hsapiens.UCSC.hg19 or
-    BSgenome.Hsapiens.UCSC.hg38 for *Homo sapiens* and
-    BSgenome.Mmusculus.UCSC.mm10 or BSgenome.Mmusculus.UCSC.mm39 for
-    *Mus musculus*.
+- **Select genomic build (GV)**: Version of the genome to work with.
+  Options are BSgenome.Hsapiens.UCSC.hg19 or BSgenome.Hsapiens.UCSC.hg38
+  for *Homo sapiens* and BSgenome.Mmusculus.UCSC.mm10 or
+  BSgenome.Mmusculus.UCSC.mm39 for *Mus musculus*.
 
--   **Select mutational signatures matrix (GV)**: Mutation matrices from
-    \[COSMIC\]((<https://cancer.sanger.ac.uk/sign> atures/downloads/)
-    for single (SBS) and double (DBS) base substitutions. Matrices from
-    versions 2 and 3.2 are available for *Homo sapiens* and *Mus
-    musculus*.
+- **Select mutational signatures matrix (GV)**: Mutation matrices from
+  \[COSMIC\]((<https://cancer.sanger.ac.uk/sign> atures/downloads/) for
+  single (SBS) and double (DBS) base substitutions. Matrices from
+  versions 2 and 3.2 are available for *Homo sapiens* and *Mus
+  musculus*.
 
 ##### 4. Run GEGVIC
 
@@ -395,7 +391,7 @@ and `GSVA`
 [package](https://www.bioconductor.org/packages/release/bioc/html/GSVA.html)
 are used for results summary and visualization.
 
--   **PCA** with all the samples colored as indicated by the user.
+- **PCA** with all the samples colored as indicated by the user.
 
 ![](www/06_PCA.png)
 
@@ -405,35 +401,33 @@ per each group comparison, and their total number will depend on the
 total number of sample groups. In each case the following information
 will be shown:
 
--   **Table of differential gene expression**: This table shows
-    different values per each gene such as fold change in log2 scale or
-    the adjusted p-values. This table is dynamic, meaning that the
-    number of rows shown can changed by the user. Also, rows can be
-    sorted by clicking the name of a specific column or use the search
-    box to filter by gene symbol. The download button can be used to
-    obtain the table as a .csv file.
+- **Table of differential gene expression**: This table shows different
+  values per each gene such as fold change in log2 scale or the adjusted
+  p-values. This table is dynamic, meaning that the number of rows shown
+  can changed by the user. Also, rows can be sorted by clicking the name
+  of a specific column or use the search box to filter by gene symbol.
+  The download button can be used to obtain the table as a .csv file.
 
 ![](www/07_table_differential_expression.png)
 
--   **Volcano plot** summarising the results from the table.
-    Significantly up- or down-regulated genes, meaning that the fold
-    change and adjusted p-values pass the criteria indicated by the user
-    in the parameteres section, will be shown in red or blue
-    respectively. Additionally, the gene symbol of top 10 genes in each
-    direction will be plotted.
+- **Volcano plot** summarising the results from the table. Significantly
+  up- or down-regulated genes, meaning that the fold change and adjusted
+  p-values pass the criteria indicated by the user in the parameteres
+  section, will be shown in red or blue respectively. Additionally, the
+  gene symbol of top 10 genes in each direction will be plotted.
 
 ![](www/08_volcano_plot.png)
 
--   **Gene Set Enrichment Analysis (GSEA)**: The results of GSEA will be
-    shown in a table similar to that from the diferential gene
-    expression. The resulting top 20 regulated gene sets are shown in a
-    bubble plot where Normalized Enrichment Score (NES) is shown. The
-    size of the bubbles are determined by the percentage of genes in the
-    gene set that belong to the leading edge (core). Then, results from
-    the `GSEAmining` package will be plotted. The first is a clustering
-    of the top 20 more enriched gene sets in the analysis. The second
-    plot will be a word cloud for each cluster highlighting the most
-    enriched terms within the gene sets present in that cluster.
+- **Gene Set Enrichment Analysis (GSEA)**: The results of GSEA will be
+  shown in a table similar to that from the diferential gene expression.
+  The resulting top 20 regulated gene sets are shown in a bubble plot
+  where Normalized Enrichment Score (NES) is shown. The size of the
+  bubbles are determined by the percentage of genes in the gene set that
+  belong to the leading edge (core). Then, results from the `GSEAmining`
+  package will be plotted. The first is a clustering of the top 20 more
+  enriched gene sets in the analysis. The second plot will be a word
+  cloud for each cluster highlighting the most enriched terms within the
+  gene sets present in that cluster.
 
 *Note: In the case there are no gene sets enriched with the p-value
 cutoff defined by the user, a message will be shown instead of the table
@@ -443,8 +437,8 @@ and figures.*
 ![](www/11_gsea_cluster.png) ![](www/12_gsea_wordcloud.png)
 ![](www/13_leading_edge.png)
 
--   **Gene Set Variation Analysis (GSVA)**: Results are shown as a
-    heatmap and the values in a table.
+- **Gene Set Variation Analysis (GSVA)**: Results are shown as a heatmap
+  and the values in a table.
 
 ![](www/14_gsva_heatmap.png) ![](www/15_gsva_table.png)
 
@@ -457,33 +451,32 @@ variations in the samples. Mutation summaries are calculated using the
 whereas mutational signatures are predicted using the `deconstructSigs`
 [package](https://github.com/raerose01/deconstructSigs).
 
--   **Mutations summary**: The first figure shows a general summary of
-    the mutations, including the type of variations, the proportion of
-    base changes or the number of mutations per sample.
+- **Mutations summary**: The first figure shows a general summary of the
+  mutations, including the type of variations, the proportion of base
+  changes or the number of mutations per sample.
 
 ![](www/16_mutational_summary.png)
 
--   **Oncolplot** with the most frequently mutated genes (number defined
-    by the user).
+- **Oncolplot** with the most frequently mutated genes (number defined
+  by the user).
 
 ![](www/16_oncoplot.png)
 
--   **Mutational load**: Here, the mutational load, defined as the total
-    number of mutations per sample, will be calculated per each sample
-    and a comparison by groups will be shown. Values will be available
-    in a table.
+- **Mutational load**: Here, the mutational load, defined as the total
+  number of mutations per sample, will be calculated per each sample and
+  a comparison by groups will be shown. Values will be available in a
+  table.
 
 ![](www/17_mutational_load.png) ![](www/18_mutational_load_table.png)
 
--   **Mutational signatures**: Giving the selected version of the genome
-    and the COSMIC matrix, the app will predict the contribution of
-    different mutational signatures in each sample. Then, two
-    complementary figures will be plotted. The first is a bar plot
-    showing the top four mutational signatures per sample (separated by
-    groups), whereas the second figure is a heatmap showing the
-    contribution of all predicted mutational signatures per sample. The
-    values to genereate these plots are shown in the corresponding
-    table.
+- **Mutational signatures**: Giving the selected version of the genome
+  and the COSMIC matrix, the app will predict the contribution of
+  different mutational signatures in each sample. Then, two
+  complementary figures will be plotted. The first is a bar plot showing
+  the top four mutational signatures per sample (separated by groups),
+  whereas the second figure is a heatmap showing the contribution of all
+  predicted mutational signatures per sample. The values to genereate
+  these plots are shown in the corresponding table.
 
 ![](www/19_mutational_signatures_bars.png)
 ![](www/20_mutational_signatures_heatmap.png)
@@ -498,37 +491,37 @@ using the `inmmunedeconv`
 prediction algorithms: QUANTISEQ, TIMER, MCP_COUNTER, XCELL, EPIC and
 CIBERSORT.
 
--   **Summary of predicted immune cell populations**: Table showing the
-    prediction results of each immune cell types by each algorithm per
-    sample with the same format as the other tables commented before.
-    Like them, there is also download button to obtain the full table in
-    a form of a .csv file.
+- **Summary of predicted immune cell populations**: Table showing the
+  prediction results of each immune cell types by each algorithm per
+  sample with the same format as the other tables commented before. Like
+  them, there is also download button to obtain the full table in a form
+  of a .csv file.
 
 ![](www/22_table_ic.png)
 
--   **Immune composition cell types comparison by groups**: A plot were
-    each immune cell type is compared between sample groups within all
-    the six prediction methods. CIBERSORT result will only be shown if
-    the user specifies a local folder.
+- **Immune composition cell types comparison by groups**: A plot were
+  each immune cell type is compared between sample groups within all the
+  six prediction methods. CIBERSORT result will only be shown if the
+  user specifies a local folder.
 
 ![](www/23_ic_by_group.png)
 
--   **Immune composition: Cell types comparison within samples**: A plot
-    were the predicted percentage of each immune cell type is show for
-    each sample. Only CIBERSORT, EPIC and QUANTISEQ methods allow to
-    compare cell types within a sample. CIBERSORT result will only be
-    shown if the user specifies a local folder.
+- **Immune composition: Cell types comparison within samples**: A plot
+  were the predicted percentage of each immune cell type is show for
+  each sample. Only CIBERSORT, EPIC and QUANTISEQ methods allow to
+  compare cell types within a sample. CIBERSORT result will only be
+  shown if the user specifies a local folder.
 
 ![](www/24_ic_within_samples.png)
 
--   **Immune Score**: The state of Effector cells (EC), Suppressor cells
-    (SC), Immunomodulators (CP) and MHC molecules (MHC) are shown. All
-    this values are added up to calculate an immunophenoscore (IPS). The
-    table show the corresponding values for each sample. Finally, there
-    is a button to generate a pdf report that will contain an
-    immunophenogram (IPG) per each sample per page. Here we show an
-    example of one of the samples. For further interpretation please
-    visit [The Cancer Immunome Atlas](https://tcia.at/tools/toolsMain).
+- **Immune Score**: The state of Effector cells (EC), Suppressor cells
+  (SC), Immunomodulators (CP) and MHC molecules (MHC) are shown. All
+  this values are added up to calculate an immunophenoscore (IPS). The
+  table show the corresponding values for each sample. Finally, there is
+  a button to generate a pdf report that will contain an immunophenogram
+  (IPG) per each sample per page. Here we show an example of one of the
+  samples. For further interpretation please visit [The Cancer Immunome
+  Atlas](https://tcia.at/tools/toolsMain).
 
 ![](www/26_immunophenoscore.png)
 
