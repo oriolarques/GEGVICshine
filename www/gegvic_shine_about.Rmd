@@ -31,8 +31,8 @@ A shiny app with the purpose of offering everything GEGVIC can do while eliminat
 
 |Oriol Arqués|Laia Bassaganyas|
 |:------------:|:------------:|
-|Research Associate <br/> Stem Cells and Cancer lab <br/> Vall d'Hebron Institute of Oncology|Postdoctoral Researcher <br/> Cancer Bioinformatics and Systems Biology <br/> Institut de Recherche en Cancérologie de Montpellier|
-|oarques@vhio.net|laia.bassaganyas-bars@inserm.fr|
+|Research Associate <br/> Stem Cells and Cancer lab <br/> Vall d'Hebron Institute of Oncology|Postdoctoral Researcher <br/> Signaling, Plasticity and Cancer Lab <br/> Institut de Génomique Fonctionelle (IGF) de Montpellier|
+|oarques@vhio.net|laia.bassaganyas@igf.cnrs.fr|
 |||
 
 
