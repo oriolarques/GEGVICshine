@@ -72,7 +72,7 @@ s_plot_comp_samples <- function(df,
         # Geometric objects
         geom_violin() +
         geom_boxplot(width = 0.1, outlier.shape = NA) +
-        geom_point(alpha = 0.5, position = position_jitter(0.2)) +
+        #geom_point(alpha = 0.5, position = position_jitter(0.2)) +
         
         # Define colors
         scale_color_manual(values = colors) +
